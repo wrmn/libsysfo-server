@@ -30,3 +30,21 @@ func testMigrate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("table created")
 
 }
+
+func testSeedProfile(w http.ResponseWriter, r *http.Request) {
+	database.SeedProfileAccount()
+	database.SeedProfileData()
+}
+
+func testSeedBook(w http.ResponseWriter, r *http.Request) {
+	// NOTE: this need API make sure seed it when it needed to be
+	database.SeedBook()
+	database.SeedBookDetail()
+}
+
+func testSeedLibrary(w http.ResponseWriter, r *http.Request) {
+	database.SeedLibraryData()
+	database.SeedLibraryCollection()
+	database.SeedLibraryPaper()
+	database.SeedLibraryPaperPermission()
+}

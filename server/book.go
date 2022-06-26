@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -43,8 +42,6 @@ func booksTestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(template.(map[string]interface{}))
-
-	json.NewEncoder(w).Encode(template)
+	json.NewEncoder(w).Encode(template.(map[string]interface{})["books"].([]interface{})[0])
 
 }

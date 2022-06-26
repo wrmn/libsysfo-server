@@ -3,6 +3,8 @@ module libsysfo-server
 go 1.17
 
 require (
+	github.com/brianvoe/gofakeit v3.18.0+incompatible
+	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/fatih/color v1.13.0
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.6

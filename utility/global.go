@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/brianvoe/gofakeit"
 	"github.com/fatih/color"
 )
 
@@ -32,4 +33,10 @@ func InfoPrint(status int, msg string) {
 	}
 	log.Printf("%s : %s\n", logInfo, msg)
 	fmt.Printf("%s [%s] %s\n", t, info, msg)
+}
+
+func DateRandom(minYear string, maxYear string) time.Time {
+	min, _ := time.Parse(Dmy, minYear)
+	max, _ := time.Parse(Dmy, maxYear)
+	return gofakeit.DateRange(min, max)
 }
