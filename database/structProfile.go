@@ -9,11 +9,12 @@ import (
 // login data
 type ProfileAccount struct {
 	gorm.Model
-	Id        int        `json:"id" gorm:"type:int;primaryKey;size:32"`
-	Username  string     `json:"username" gorm:"type:varchar(24);unique;not null"`
-	Email     string     `json:"email" gorm:"type:varchar(64);unique;not null"`
-	Password  string     `json:"password" gorm:"type:char(32);not null"`
-	LastLogin *time.Time `json:"lastLogin" gorm:"type:timestamp"`
+	Id          int        `json:"id" gorm:"type:int;primaryKey;size:32"`
+	Username    string     `json:"username" gorm:"type:varchar(24);unique"`
+	Email       string     `json:"email" gorm:"type:varchar(64);unique;not null"`
+	AccountType int        `json:"accountType" gorm:"type:int;size:32"`
+	Password    string     `json:"password" gorm:"type:char(32);not null"`
+	LastLogin   *time.Time `json:"lastLogin" gorm:"type:timestamp"`
 }
 
 // account information

@@ -19,13 +19,22 @@ func SeedProfileAccount() {
 	data := []ProfileAccount{}
 
 	for c := 0; c < 30; c++ {
-		data = append(data, ProfileAccount{
+		singelData := ProfileAccount{
 			Id:       c + 1,
 			Username: gofakeit.Gamertag(),
 			Email:    gofakeit.Email(),
 			Password: "f5bb0c8de146c67b44babbf4e6584cc0",
-		})
+		}
+		if c == 0 {
+			singelData.AccountType = 1
+		} else if c < 7 {
+			singelData.AccountType = 2
+		} else {
+			singelData.AccountType = 3
+		}
+		data = append(data, singelData)
 	}
+
 	DB.Create(&data)
 }
 
