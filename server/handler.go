@@ -20,3 +20,19 @@ func (data response) responseFormatter(w http.ResponseWriter) {
 	jsonResp, _ := json.Marshal(data)
 	w.Write(jsonResp)
 }
+
+func unauthorizedRequest(w http.ResponseWriter, err error) {
+	response{
+		Status:      http.StatusUnauthorized,
+		Reason:      "Unauthorized",
+		Description: err.Error(),
+	}.responseFormatter(w)
+}
+
+func badRequest(w http.ResponseWriter, msg string) {
+	response{
+		Status:      http.StatusBadRequest,
+		Reason:      "Bad Request",
+		Description: msg,
+	}.responseFormatter(w)
+}

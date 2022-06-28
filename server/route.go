@@ -24,6 +24,7 @@ func Serve(port string) {
 	r.HandleFunc("/db/seed/library", testSeedLibrary).Methods("GET")
 
 	r.HandleFunc("/profile/login/google", loginGoogle).Methods("POST")
+	r.HandleFunc("/profile/validate", emailValidate).Methods("GET")
 	http.Handle("/", r)
 	utility.InfoPrint(1, fmt.Sprintf("service at port %s", port))
 	http.ListenAndServe(":"+port, c.Handler(r))

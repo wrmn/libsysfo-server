@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (content Content) SendEmail(receiver ToData) {
+func (content Content) SendEmail(receiver ToData) (err error) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
@@ -26,11 +26,11 @@ func (content Content) SendEmail(receiver ToData) {
 	}
 	json_data, err := json.Marshal(values)
 	if err != nil {
-		fmt.Printf("Got error %s", err.Error())
+		return
 	}
 	req, err := http.NewRequest("POST", "https://api.sendinblue.com/v3/smtp/email", bytes.NewBuffer(json_data))
 	if err != nil {
-		fmt.Printf("Got error %s", err.Error())
+		return
 	}
 	req.Header.Set("user-agent", "golang application")
 	req.Header.Add("content-type", "application/json")
@@ -39,13 +39,14 @@ func (content Content) SendEmail(receiver ToData) {
 
 	response, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Got error %s", err.Error())
+		return
 	}
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		fmt.Printf("Got error %s", err.Error())
+		return
 	}
 	defer response.Body.Close()
 	fmt.Printf("Code: %d\n", response.StatusCode)
 	fmt.Printf("Body: %s\n", body)
+	return nil
 }

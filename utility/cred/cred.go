@@ -9,7 +9,7 @@ import (
 )
 
 func CreateToken(data database.ProfileAccount) (t string, e error) {
-	claims := tokenModel{
+	claims := TokenModel{
 		Username:    data.Username,
 		Email:       data.Email,
 		AccountType: data.AccountType,
@@ -21,5 +21,12 @@ func CreateToken(data database.ProfileAccount) (t string, e error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	t, e = token.SignedString([]byte(os.Getenv("TOKEN_KEY")))
+	return
+}
+
+func VerifyToken(tokenString string) (t *jwt.Token, e error) {
+	t, e = jwt.ParseWithClaims(tokenString, &TokenModel{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("TOKEN_KEY")), nil
+	})
 	return
 }

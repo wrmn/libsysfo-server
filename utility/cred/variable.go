@@ -20,7 +20,7 @@ type GoogleAuthClaims struct {
 	Jti           string `json:"jti"`
 }
 
-type tokenModel struct {
+type TokenModel struct {
 	jwt.RegisteredClaims
 	Username    string `json:"username"`
 	Email       string `json:"email"`

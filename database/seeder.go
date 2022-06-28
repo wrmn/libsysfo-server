@@ -47,16 +47,17 @@ func SeedProfileData() {
 	for c := 7; c < 30; c++ {
 		birthDate := utility.DateRandom("1900-01-01", "2016-01-01").Format(utility.Dmy)
 		job := gofakeit.Job()
+		phoneNumber := gofakeit.Phone()
 		singleData := ProfileData{
 			UserId:       c + 1,
 			Name:         gofakeit.Name(),
-			Gender:       gender[rand.Intn(2)],
-			PlaceOfBirth: gofakeit.Address().City,
-			DateOfBirth:  birthDate,
-			Address1:     gofakeit.Address().Address,
-			Profession:   job.Title,
-			Institution:  job.Company,
-			PhoneNo:      gofakeit.Phone(),
+			Gender:       &(gender[rand.Intn(2)]),
+			PlaceOfBirth: &(gofakeit.Address().City),
+			DateOfBirth:  &(birthDate),
+			Address1:     &(gofakeit.Address().Address),
+			Profession:   &(job.Title),
+			Institution:  &(job.Company),
+			PhoneNo:      &(phoneNumber),
 			IsWhatsapp:   (rand.Intn(2) == 0),
 			Images:       "https://i0.wp.com/global.ac.id/wp-content/uploads/2015/04/speaker-3-v2.jpg?fit=768%2C768&ssl=1",
 		}

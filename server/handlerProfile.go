@@ -25,40 +25,28 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&e)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {
-			response{
-				Status:      http.StatusBadRequest,
-				Reason:      "Bad Request.",
-				Description: "Wrong Type provided for field " + unmarshalErr.Field,
-			}.responseFormatter(w)
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
 		} else {
-			response{
-				Status:      http.StatusBadRequest,
-				Reason:      "Bad Request",
-				Description: err.Error(),
-			}.responseFormatter(w)
+			badRequest(w, err.Error())
 		}
 		return
 	}
 
 	token, err := cred.VerifyGoogleToken(e.Credential)
 
-	user := database.ProfileAccount{}
-
 	if err != nil {
-		fmt.Println(err.Error())
-		json.NewEncoder(w).Encode(err)
-		response{
-			Status:      http.StatusUnauthorized,
-			Reason:      "Unauthorized",
-			Description: err.Error(),
-		}.responseFormatter(w)
+		unauthorizedRequest(w, err)
 	} else {
+		user := database.ProfileAccount{}
 		result := database.DB.Where("email = ?", token.Claims["email"]).Find(&user)
-
 		if result.RowsAffected == 0 {
-			googleRegisterHandler(token.Claims)
+			err := googleRegisterHandler(token.Claims)
+			if err != nil {
+				unauthorizedRequest(w, err)
+			}
 			database.DB.Where("email = ?", token.Claims["email"]).Find(&user)
 		}
+
 		now := time.Now()
 		user.LastLogin = &now
 		database.DB.Save(&user)
@@ -69,13 +57,56 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 func loginHandler(w http.ResponseWriter, data database.ProfileAccount) {
 	tokenResult, err := cred.CreateToken(data)
 	if err != nil {
-		fmt.Println(err.Error())
-		json.NewEncoder(w).Encode(err)
+		unauthorizedRequest(w, err)
 	}
-	json.NewEncoder(w).Encode(tokenResult)
+	response{
+		Data:        tokenResult,
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Success",
+	}.responseFormatter(w)
 }
 
-func googleRegisterHandler(data map[string]interface{}) {
+func emailValidate(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	token, present := query["token"]
+	if !present || len(token) == 0 {
+		badRequest(w, "token not present")
+		return
+	} else if len(token) > 1 {
+		badRequest(w, "multiple token detected")
+		return
+	}
+	tokenData, err := cred.VerifyToken(token[0])
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	profile := database.ProfileAccount{}
+	err = database.DB.Preload("ProfileData").
+		Where("email = ?", tokenData.Claims.(*cred.TokenModel).Email).
+		Find(&profile).Error
+	if err != nil {
+		badRequest(w, err.Error())
+		return
+	}
+
+	if profile.ProfileData.VerifiedAt == nil {
+		now := time.Now()
+		profile.ProfileData.VerifiedAt = &now
+		err = database.DB.Save(&profile.ProfileData).Error
+		if err != nil {
+			badRequest(w, err.Error())
+			return
+		}
+		http.Redirect(w, r, "http://localhost:3000", http.StatusSeeOther)
+	} else {
+		badRequest(w, "user already verified")
+	}
+}
+
+func googleRegisterHandler(data map[string]interface{}) (err error) {
 	lastAcc := database.ProfileAccount{}
 	database.DB.Last(&lastAcc)
 	password := gofakeit.Gamertag()
@@ -86,9 +117,26 @@ func googleRegisterHandler(data map[string]interface{}) {
 		Password:    fmt.Sprintf("%x", md5.Sum([]byte(password))),
 	}
 
+	user.ProfileData = database.ProfileData{
+		UserId:     lastAcc.Id + 1,
+		Name:       data["name"].(string),
+		IsWhatsapp: false,
+		Images:     data["picture"].(string),
+	}
+
+	tokenResult, err := cred.CreateToken(user)
+	if err != nil {
+		return
+	}
+
+	database.DB.Create(&user)
+
+	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult)
+	fmt.Println(link)
+
 	content := fmt.Sprintf("<html><head></head><body><p>Hello,</p><p>Password Sementara anda adalah %s</p>segera menuju <a href='%s'>link</a> ini untuk verifikasi akun anda</body>	</html>",
 		password,
-		"google.com",
+		link,
 	)
 
 	emailBody := email.Content{
@@ -101,7 +149,6 @@ func googleRegisterHandler(data map[string]interface{}) {
 		Email: data["email"].(string),
 	}
 
-	emailBody.SendEmail(receiver)
-
-	database.DB.Create(&user)
+	err = emailBody.SendEmail(receiver)
+	return
 }
