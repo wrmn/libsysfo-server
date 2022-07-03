@@ -8,6 +8,11 @@ type GoogleAuth struct {
 	SelectBy   string `json:"select_by"`
 }
 
+type FormAuth struct {
+	Indicator string `json:"indicator"`
+	Password  string `json:"password"`
+}
+
 type GoogleAuthClaims struct {
 	jwt.RegisteredClaims
 	Email         string `json:"email"`

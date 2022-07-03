@@ -9,18 +9,18 @@ import (
 // login data
 type ProfileAccount struct {
 	gorm.Model
-	Id          int         `json:"id" gorm:"type:int;primaryKey;size:32"`
+	ID          int         `json:"id" gorm:"type:int;primaryKey;size:32"`
 	Username    string      `json:"username" gorm:"type:varchar(32);unique"`
 	Email       string      `json:"email" gorm:"type:varchar(64);unique;not null"`
 	AccountType int         `json:"accountType" gorm:"type:int;size:32"`
 	Password    string      `json:"password,omitempty" gorm:"type:char(32);not null"`
 	LastLogin   *time.Time  `json:"lastLogin" gorm:"type:timestamp"`
-	ProfileData ProfileData `json:"profileData" gorm:"foreignKey:UserId"`
+	ProfileData ProfileData `json:"profileData" gorm:"foreignKey:UserID"`
 }
 
 // account information
 type ProfileData struct {
-	UserId       int        `json:"userId" gorm:"type:int;size:32;primaryKey;autoIncrement:false"`
+	UserID       int        `json:"userId" gorm:"type:int;size:32;primaryKey;autoIncrement:false"`
 	VerifiedAt   *time.Time `json:"verifiedAt" gorm:"type:timestamp"`
 	Name         string     `json:"name" gorm:"type:varchar(32);not null"`
 	Gender       *string    `json:"gender" gorm:"type:char(1)"`

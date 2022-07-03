@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -20,9 +21,9 @@ func SeedProfileAccount() {
 
 	for c := 0; c < 30; c++ {
 		singelData := ProfileAccount{
-			Id:       c + 1,
-			Username: gofakeit.Gamertag(),
-			Email:    gofakeit.Email(),
+			ID:       c + 1,
+			Username: strings.ToLower(gofakeit.Gamertag()),
+			Email:    strings.ToLower(gofakeit.Email()),
 			Password: "f5bb0c8de146c67b44babbf4e6584cc0",
 		}
 		if c == 0 {
@@ -47,9 +48,11 @@ func SeedProfileData() {
 	for c := 7; c < 30; c++ {
 		birthDate := utility.DateRandom("1900-01-01", "2016-01-01").Format(utility.Dmy)
 		job := gofakeit.Job()
+		job.Title = strings.ToLower(job.Title)
+		job.Company = strings.ToLower(job.Company)
 		phoneNumber := gofakeit.Phone()
 		singleData := ProfileData{
-			UserId:       c + 1,
+			UserID:       c + 1,
 			Name:         gofakeit.Name(),
 			Gender:       &(gender[rand.Intn(2)]),
 			PlaceOfBirth: &(gofakeit.Address().City),
@@ -75,14 +78,14 @@ func SeedBook() {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	req, err := http.NewRequest("GET", "http://localhost:8000/api/books?page=1", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8000/api/books?page=100", nil)
 	if err != nil {
 		log.Fatal("error nih")
 		return
 	}
 	req.Header.Set("user-agent", "golang application")
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Authorization", "Bearer 9|IBwB98fxJElxhZPSj4IjPFyQ6lgMYbDvxYD5g9E9")
+	req.Header.Add("Authorization", "Bearer 10|6UHnWG0z8pBYl60Dm0ioMBjwPGuRoGodYcr0X80o")
 	response, err := client.Do(req)
 	if err != nil {
 		log.Fatal("error nih")
@@ -111,6 +114,7 @@ func SeedBook() {
 			Image:  content["image"].(string),
 			Title:  content["title"].(string),
 			Author: content["author"].(string),
+			Source: "gramedia",
 			Slug:   content["slug"].(string),
 		})
 	}
@@ -129,12 +133,13 @@ func SeedBookDetail() {
 		link := fmt.Sprintf("http://localhost:8000/api/books/%s/detail", dataBook.Slug)
 		req, err := http.NewRequest("GET", link, nil)
 		if err != nil {
+			fmt.Println(link)
 			log.Fatal("error nih")
 			return
 		}
 		req.Header.Set("user-agent", "golang application")
 		req.Header.Add("Accept", "application/json")
-		req.Header.Add("Authorization", "Bearer 9|IBwB98fxJElxhZPSj4IjPFyQ6lgMYbDvxYD5g9E9")
+		req.Header.Add("Authorization", "Bearer 10|6UHnWG0z8pBYl60Dm0ioMBjwPGuRoGodYcr0X80o")
 		response, err := client.Do(req)
 		if err != nil {
 			log.Fatal("error nih")
@@ -156,7 +161,7 @@ func SeedBookDetail() {
 		}
 		responseBody := template.(map[string]interface{})["book"].(map[string]interface{})["detail"].(map[string]interface{})
 		dataDetails = append(dataDetails, BookDetail{
-			Id:          dataBook.Id,
+			ID:          dataBook.ID,
 			ReleaseDate: responseBody["release_date"].(string),
 			Description: responseBody["description"].(string),
 			Language:    responseBody["language"].(string),
@@ -181,7 +186,7 @@ func SeedLibraryData() {
 	}
 
 	data = append(data, LibraryData{
-		UserId:        2,
+		UserID:        2,
 		Name:          "dinas perpustakaan dan kearsipan kota padang",
 		Address:       "Jl. Batang Anai, Rimbo Kaluang, Kec. Padang Bar., Kota Padang, Sumatera Barat",
 		Coordinate:    pq.Float64Array{100.35884639177868, -0.9266827607129856},
@@ -190,7 +195,7 @@ func SeedLibraryData() {
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
 	}, LibraryData{
-		UserId:        3,
+		UserID:        3,
 		Name:          "perpustakaan universitas andalas",
 		Address:       "3FP6+M4V Kampus Universitas Andalas, Limau Manis, Kec. Pauh, Kota Padang, Sumatera Barat 25175",
 		Coordinate:    pq.Float64Array{100.46029408540059, -0.9132586264043556},
@@ -199,37 +204,37 @@ func SeedLibraryData() {
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
 	}, LibraryData{
-		UserId:        4,
+		UserID:        4,
 		Name:          "perpustakaan pusat uin imam bonjol padang",
 		Address:       "399P+PVR, Kampus UIN Imam Bonjol Jl. Prof. Mahmud Yunus, Lubuk Lintah, Kec. Kuranji, Kota Padang, Sumatera Barat 25176",
-		Coordinate:    pq.Float64Array{-0.930441718578502, 100.38715866243624},
+		Coordinate:    pq.Float64Array{100.38715866243624, -0.930441718578502},
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://asset.kompas.com/crops/gj4bxVEM-ombeC7YhdMPWTQqMwA=/0x67:800x600/750x500/data/photo/2018/01/06/3283493641.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
 	}, LibraryData{
-		UserId:        5,
+		UserID:        5,
 		Name:          "perpustakaan universitas bung hatta",
 		Address:       "38VV+HQ5, North Ulak Karang, Padang Utara, Padang City, West Sumatra",
-		Coordinate:    pq.Float64Array{-0.9062321120689367, 100.34450263160929},
+		Coordinate:    pq.Float64Array{100.34450263160929, -0.9062321120689367},
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://i.pinimg.com/originals/ff/96/ee/ff96eecd5f94fc82b561ef2812c541de.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
 	}, LibraryData{
-		UserId:        6,
+		UserID:        6,
 		Name:          "UNP central library",
 		Address:       "483W+HR9, West Air Tawar, Padang Utara, Padang City, West Sumatra",
-		Coordinate:    pq.Float64Array{-0.8960782388043234, 100.34692795143607},
+		Coordinate:    pq.Float64Array{100.34692795143607, -0.8960782388043234},
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://www.agati.com/wp-content/uploads/2017/06/Diane-Lam-Blog-header.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
 	}, LibraryData{
-		UserId:        7,
+		UserID:        7,
 		Name:          "Perpustakaan Amanah",
 		Address:       "Bundo Kanduong No.1, Belakang Tangsi, Kec. Padang Bar., Kota Padang, Sumatera Barat",
-		Coordinate:    pq.Float64Array{-0.9519855092298098, 100.359963845534},
+		Coordinate:    pq.Float64Array{100.359963845534, -0.9519855092298098},
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://s26162.pcdn.co/wp-content/uploads/2021/01/bookshelf1.jpg",
 		ImagesContent: pq.StringArray(content),
@@ -243,12 +248,15 @@ func SeedLibraryCollection() {
 	var data []LibraryCollection
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
+	sn := 8801
 
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 10; j++ {
+			sn++
 			data = append(data, LibraryCollection{
-				LibraryId:    i + 1,
-				BookId:       rand.Intn(23) + 1,
+				SerialNumber: fmt.Sprintf("1234.23.12.%d", sn),
+				LibraryID:    i + 1,
+				BookID:       rand.Intn(23) + 1,
 				Availability: true,
 				Status:       rand.Intn(4) + 1,
 			})
@@ -264,7 +272,7 @@ func SeedLibraryPaper() {
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 10; j++ {
 			data = append(data, LibraryPaper{
-				LibraryId:   i + 1,
+				LibraryID:   i + 1,
 				Title:       gofakeit.LoremIpsumSentence(5),
 				Subject:     pq.StringArray{gofakeit.LoremIpsumWord(), gofakeit.LoremIpsumWord()},
 				Abstract:    gofakeit.LoremIpsumParagraph(3, 3, 10, " "),
@@ -284,8 +292,8 @@ func SeedLibraryPaperPermission() {
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 60; i++ {
 		data = append(data, LibraryPaperPermission{
-			PaperId:     rand.Intn(60) + 1,
-			UserId:      rand.Intn(23) + 8,
+			PaperID:     rand.Intn(60) + 1,
+			UserID:      rand.Intn(23) + 8,
 			RedirectUrl: "https://drive.google.com/file/d/0B4eE3EAAsV6jaXg5SXQweDUyc28/view?resourcekey=0-QeSPnTIRa2FWntQ-9ev6wQ",
 		})
 	}

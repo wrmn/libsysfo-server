@@ -7,9 +7,9 @@ import (
 )
 
 type LibraryData struct {
-	Id            int             `json:"id" gorm:"type:int;size:32;primaryKey"`
-	UserId        int             `json:"userId" gorm:"type:int;size:32;autoIncrement:false"`
-	User          ProfileAccount  `json:"user" gorm:"foreignKey:UserId"`
+	ID            int             `json:"id" gorm:"type:int;size:32;primaryKey"`
+	UserID        int             `json:"userId" gorm:"type:int;size:32;autoIncrement:false"`
+	User          ProfileAccount  `json:"user" gorm:"foreignKey:UserID"`
 	Name          string          `json:"name" gorm:"type:varchar(64);not null"`
 	Address       string          `json:"address" gorm:"type:varchar(128);not null"`
 	Coordinate    pq.Float64Array `json:"coordinate" gorm:"type:decimal[]"`
@@ -19,33 +19,35 @@ type LibraryData struct {
 	Webpage       string          `json:"webpage" gorm:"type:varchar(32)"`
 }
 
+// TODO: Add serial number here
 type LibraryCollection struct {
 	gorm.Model
-	Id           int                       `json:"id" gorm:"type:int;primaryKey;size:32"`
-	LibraryId    int                       `gorm:"type:int;size:32;autoIncrement:false"`
-	Library      LibraryData               `json:"library" gorm:"foreignKey:LibraryId"`
-	BookId       int                       `gorm:"type:int;size:32;autoIncrement:false"`
-	Book         Book                      `json:"book" gorm:"foreignKey:BookId"`
+	ID           int                       `json:"id" gorm:"type:int;primaryKey;size:32"`
+	SerialNumber string                    `json:"serialNumber" gorm:"type:varchar(32);unique;not null"`
+	LibraryID    int                       `gorm:"type:int;size:32;autoIncrement:false"`
+	Library      LibraryData               `json:"library" gorm:"foreignKey:LibraryID"`
+	BookID       int                       `gorm:"type:int;size:32;autoIncrement:false"`
+	Book         Book                      `json:"book" gorm:"foreignKey:BookID"`
 	Availability bool                      `json:"availability" gorm:"not null"`
 	Status       int                       `json:"status" gorm:"type:int;size:32;not null"`
-	Borrow       []LibraryCollectionBorrow `json:"borrowHistory" gorm:"foreignKey:CollectionId"`
+	Borrow       []LibraryCollectionBorrow `json:"borrowHistory" gorm:"foreignKey:CollectionID"`
 }
 
 type LibraryCollectionBorrow struct {
-	Id           int               `json:"id" gorm:"type:int;primaryKey;size:32"`
+	ID           int               `json:"id" gorm:"type:int;primaryKey;size:32"`
 	CreatedAt    datatypes.Date    `json:"createdAt" gorm:"type:timestamp"`
 	ReturnedAt   datatypes.Date    `json:"returnedAt" gorm:"type:timestamp"`
-	CollectionId int               `gorm:"type:int;size:32;autoIncrement:false"`
-	Collection   LibraryCollection `json:"collection" gorm:"foreignKey:CollectionId"`
-	UserId       int               `gorm:"type:int;size:32;autoIncrement:false"`
-	User         ProfileAccount    `json:"user" gorm:"foreignKey:UserId"`
+	CollectionID int               `gorm:"type:int;size:32;autoIncrement:false"`
+	Collection   LibraryCollection `json:"collection" gorm:"foreignKey:CollectionID"`
+	UserID       int               `gorm:"type:int;size:32;autoIncrement:false"`
+	User         ProfileAccount    `json:"user" gorm:"foreignKey:UserID"`
 }
 
 type LibraryPaper struct {
 	gorm.Model
-	Id          int                      `json:"id" gorm:"type:int;primaryKey;size:32"`
-	LibraryId   int                      `gorm:"type:int;size:32;autoIncrement:false"`
-	Library     LibraryData              `json:"library" gorm:"foreignKey:LibraryId"`
+	ID          int                      `json:"id" gorm:"type:int;primaryKey;size:32"`
+	LibraryID   int                      `gorm:"type:int;size:32;autoIncrement:false"`
+	Library     LibraryData              `json:"library" gorm:"foreignKey:LibraryID"`
 	Title       string                   `json:"title" gorm:"type:varchar(128)"`
 	Subject     pq.StringArray           `json:"subject" gorm:"type:varchar(16)[]"`
 	Abstract    string                   `json:"abstract"`
@@ -53,22 +55,22 @@ type LibraryPaper struct {
 	Description datatypes.JSON           `json:"description"`
 	Access      bool                     `json:"access"`
 	PaperUrl    string                   `gorm:"type:varchar(128)"`
-	Permission  []LibraryPaperPermission `json:"permission" gorm:"foreignKey:PaperId"`
+	Permission  []LibraryPaperPermission `json:"permission" gorm:"foreignKey:PaperID"`
 }
 
 type LibraryPaperPermission struct {
 	gorm.Model
-	Id          int            `gorm:"type:int;primaryKey;size:32"`
-	PaperId     int            `gorm:"type:int;size:32;autoIncrement:false"`
-	Paper       LibraryPaper   `json:"paper" gorm:"foreignKey:PaperId"`
-	UserId      int            `gorm:"type:int;size:32;autoIncrement:false"`
-	User        ProfileAccount `json:"user" gorm:"foreignKey:UserId"`
+	ID          int            `gorm:"type:int;primaryKey;size:32"`
+	PaperID     int            `gorm:"type:int;size:32;autoIncrement:false"`
+	Paper       LibraryPaper   `json:"paper" gorm:"foreignKey:PaperID"`
+	UserID      int            `gorm:"type:int;size:32;autoIncrement:false"`
+	User        ProfileAccount `json:"user" gorm:"foreignKey:UserID"`
 	RedirectUrl string         `json:"redirectUrl" gorm:"type:varchar(128)"`
 }
 
 type LibraryPaperAccess struct {
-	Id           int                    `json:"id" gorm:"type:int;primaryKey;size:32"`
+	ID           int                    `json:"id" gorm:"type:int;primaryKey;size:32"`
 	CreatedAt    datatypes.Date         `json:"createdAt" gorm:"type:timestamp"`
-	PermissionId int                    `gorm:"type:int;size:32;autoIncrement:false"`
-	Permission   LibraryPaperPermission `json:"paper" gorm:"foreignKey:PermissionId"`
+	PermissionID int                    `gorm:"type:int;size:32;autoIncrement:false"`
+	Permission   LibraryPaperPermission `json:"paper" gorm:"foreignKey:PermissionID"`
 }

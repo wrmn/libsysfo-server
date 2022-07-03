@@ -2,15 +2,13 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-)
+	"strconv"
+	"strings"
 
-type response struct {
-	Data        interface{} `json:"data,omitempty"`
-	Status      int         `json:"status"`
-	Reason      string      `json:"reason"`
-	Description string      `json:"description"`
-}
+	"gorm.io/gorm"
+)
 
 func (data response) responseFormatter(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
@@ -35,4 +33,57 @@ func badRequest(w http.ResponseWriter, msg string) {
 		Reason:      "Bad Request",
 		Description: msg,
 	}.responseFormatter(w)
+}
+
+func intServerError(w http.ResponseWriter, err error) {
+	response{
+		Status:      http.StatusInternalServerError,
+		Reason:      "Internal Server Error",
+		Description: err.Error(),
+	}.responseFormatter(w)
+}
+
+func paginator(r *http.Request, limit int) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		q := r.URL.Query()
+		page, _ := strconv.Atoi(q.Get("page"))
+		if page == 0 {
+			page = 1
+		}
+
+		offset := (page - 1) * limit
+		return db.Offset(offset).Limit(limit)
+	}
+}
+
+func bookFilter(r *http.Request, limit int) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		q := r.URL.Query()
+		page, _ := strconv.Atoi(q.Get("page"))
+		if page == 0 {
+			page = 1
+		}
+		offset := (page - 1) * limit
+		db = db.Offset(offset).Limit(limit)
+		if q.Has("keyword") {
+			keyword := fmt.Sprintf("%%%s%%", strings.ToLower(q.Get("keyword")))
+			db = db.Where("LOWER(title) like ?", keyword).
+				Or("LOWER(author) like ?", keyword)
+		}
+		return db
+	}
+}
+
+func (data paginate) generate(r *http.Request, page int) (result paginate) {
+	// NOTE:change to https when deployed
+	link := "http://" + r.Host + r.URL.Path + "?page="
+	if page > 1 {
+		result.Prev = link + strconv.Itoa(page-1)
+	}
+	result.Current = link + strconv.Itoa(page)
+	result.Data = data.Data
+	if result.Data != 0 {
+		result.Next = link + strconv.Itoa(page+1)
+	}
+	return
 }

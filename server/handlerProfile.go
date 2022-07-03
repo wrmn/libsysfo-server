@@ -36,6 +36,7 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		unauthorizedRequest(w, err)
+		return
 	} else {
 		user := database.ProfileAccount{}
 		result := database.DB.Where("email = ?", token.Claims["email"]).Find(&user)
@@ -43,24 +44,60 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 			err := googleRegisterHandler(token.Claims)
 			if err != nil {
 				unauthorizedRequest(w, err)
+				return
 			}
 			database.DB.Where("email = ?", token.Claims["email"]).Find(&user)
 		}
 
-		now := time.Now()
-		user.LastLogin = &now
-		database.DB.Save(&user)
 		loginHandler(w, user)
 	}
 }
 
+func loginForm(w http.ResponseWriter, r *http.Request) {
+	var e cred.FormAuth
+	var unmarshalErr *json.UnmarshalTypeError
+
+	decoder := json.NewDecoder(r.Body)
+
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+	e.Password = fmt.Sprintf("%x", md5.Sum([]byte(e.Password)))
+
+	user := database.ProfileAccount{}
+	result := database.DB.Where("email = ? AND password = ?", e.Indicator, e.Password).Or("username = ? AND password = ?", e.Indicator, e.Password).Find(&user)
+	if result.RowsAffected == 0 {
+		err := errors.New("invalid username or password")
+		unauthorizedRequest(w, err)
+		return
+	} else if user.AccountType != 3 {
+		err := errors.New("user not allowed")
+		unauthorizedRequest(w, err)
+		return
+	}
+	loginHandler(w, user)
+}
+
 func loginHandler(w http.ResponseWriter, data database.ProfileAccount) {
+	now := time.Now()
+	data.LastLogin = &now
+	database.DB.Save(&data)
 	tokenResult, err := cred.CreateToken(data)
 	if err != nil {
 		unauthorizedRequest(w, err)
+		return
 	}
 	response{
-		Data:        tokenResult,
+		Data: responseBody{
+			Token: tokenResult,
+		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
 		Description: "Success",
@@ -100,6 +137,7 @@ func emailValidate(w http.ResponseWriter, r *http.Request) {
 			badRequest(w, err.Error())
 			return
 		}
+		//NOTE: change to deployed url client
 		http.Redirect(w, r, "http://localhost:3000", http.StatusSeeOther)
 	} else {
 		badRequest(w, "user already verified")
@@ -111,14 +149,14 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 	database.DB.Last(&lastAcc)
 	password := gofakeit.Gamertag()
 	user := database.ProfileAccount{
-		Id:          lastAcc.Id + 1,
+		ID:          lastAcc.ID + 1,
 		Email:       data["email"].(string),
 		AccountType: 3,
 		Password:    fmt.Sprintf("%x", md5.Sum([]byte(password))),
 	}
 
 	user.ProfileData = database.ProfileData{
-		UserId:     lastAcc.Id + 1,
+		UserID:     lastAcc.ID + 1,
 		Name:       data["name"].(string),
 		IsWhatsapp: false,
 		Images:     data["picture"].(string),
@@ -130,7 +168,7 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 	}
 
 	database.DB.Create(&user)
-
+	//NOTE: change to deployed url server
 	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult)
 	fmt.Println(link)
 
