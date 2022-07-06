@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"libsysfo-server/utility"
+	bookserver "libsysfo-server/utility/book-server"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -78,47 +80,51 @@ func SeedBook() {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	req, err := http.NewRequest("GET", "http://localhost:8000/api/books?page=100", nil)
-	if err != nil {
-		log.Fatal("error nih")
-		return
-	}
-	req.Header.Set("user-agent", "golang application")
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Authorization", "Bearer 10|6UHnWG0z8pBYl60Dm0ioMBjwPGuRoGodYcr0X80o")
-	response, err := client.Do(req)
-	if err != nil {
-		log.Fatal("error nih")
-		return
-	}
-	defer response.Body.Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatal("error nih")
-		return
-	}
+	for i := 0; i < 3; i++ {
+		page := 3 + i
+		link := fmt.Sprintf("%s/api/books?page=%d", os.Getenv("BOOK_SERVER_URL"), page)
+		req, err := http.NewRequest("GET", link, nil)
+		if err != nil {
+			log.Fatal("error nih")
+			return
+		}
+		req.Header.Set("user-agent", "golang application")
+		req.Header.Add("Accept", "application/json")
+		req.Header.Add("Authorization", "Bearer 10|6UHnWG0z8pBYl60Dm0ioMBjwPGuRoGodYcr0X80o")
+		response, err := client.Do(req)
+		if err != nil {
+			log.Fatal("error nih")
+			return
+		}
+		defer response.Body.Close()
+		b, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Fatal("error nih")
+			return
+		}
+		if response.StatusCode == 200 {
 
-	var template interface{}
+			var template bookserver.BookResponse
 
-	err = json.Unmarshal(b, &template)
-	if err != nil {
-		log.Fatal("error nih")
-		return
+			err = json.Unmarshal(b, &template)
+			if err != nil {
+				log.Fatal("error nih")
+				return
+			}
+
+			responseBody := template.Books
+
+			for _, content := range responseBody {
+				data = append(data, Book{
+					Image:  *content.Image,
+					Title:  *content.Title,
+					Author: *content.Author,
+					Source: "gramedia",
+					Slug:   *content.Slug,
+				})
+			}
+		}
 	}
-
-	responseBody := template.(map[string]interface{})["books"].([]interface{})
-
-	for _, singleData := range responseBody {
-		content := singleData.(map[string]interface{})
-		data = append(data, Book{
-			Image:  content["image"].(string),
-			Title:  content["title"].(string),
-			Author: content["author"].(string),
-			Source: "gramedia",
-			Slug:   content["slug"].(string),
-		})
-	}
-
 	DB.Create(&data)
 }
 
@@ -130,7 +136,7 @@ func SeedBookDetail() {
 		client := &http.Client{
 			Timeout: time.Second * 10,
 		}
-		link := fmt.Sprintf("http://localhost:8000/api/books/%s/detail", dataBook.Slug)
+		link := fmt.Sprintf("%s/api/books/%s/detail", os.Getenv("BOOK_SERVER_URL"), dataBook.Slug)
 		req, err := http.NewRequest("GET", link, nil)
 		if err != nil {
 			fmt.Println(link)
@@ -151,25 +157,28 @@ func SeedBookDetail() {
 			log.Fatal("error nih")
 			return
 		}
+		if response.StatusCode == 200 {
+			var template bookserver.BookResponse
 
-		var template interface{}
+			err = json.Unmarshal(b, &template)
+			if err != nil {
+				log.Fatal("error nih")
+				return
+			}
 
-		err = json.Unmarshal(b, &template)
-		if err != nil {
-			log.Fatal("error nih")
-			return
+			responseBody := *template.Book.Detail
+
+			dataDetails = append(dataDetails, BookDetail{
+				ID:          dataBook.ID,
+				ReleaseDate: *responseBody.ReleaseDate,
+				Description: *responseBody.Description,
+				Language:    *responseBody.Language,
+				Country:     *responseBody.Country,
+				Publisher:   *responseBody.Publisher,
+				PageCount:   *responseBody.PageCount,
+				Category:    *responseBody.Category,
+			})
 		}
-		responseBody := template.(map[string]interface{})["book"].(map[string]interface{})["detail"].(map[string]interface{})
-		dataDetails = append(dataDetails, BookDetail{
-			ID:          dataBook.ID,
-			ReleaseDate: responseBody["release_date"].(string),
-			Description: responseBody["description"].(string),
-			Language:    responseBody["language"].(string),
-			Country:     responseBody["country"].(string),
-			Publisher:   responseBody["publisher"].(string),
-			PageCount:   responseBody["page_count"].(float64),
-			Category:    responseBody["category"].(string),
-		})
 	}
 	DB.Create(&dataDetails)
 }
@@ -178,7 +187,7 @@ func SeedLibraryData() {
 	var data []LibraryData
 	content := []string{
 		"https://i.pinimg.com/474x/24/ef/00/24ef0042f7c07e1aa47280106461b853.jpg",
-		"https://api.designcitylab.com/public/images/article-images/Beijing-Sub-Centre-Library-02_HK_N349156.jpg",
+		"https://media.istockphoto.com/photos/library-bookshelves-with-books-and-textbooks-learning-and-education-picture-id1200326335?k=20&m=1200326335&s=612x612&w=0&h=TXy8Z48ULgGdJNWaNSXlGR5oQHCYD9rbBysf7U9w0HA=",
 		"https://images.adsttc.com/media/images/5ddf/ad94/3312/fdb8/d300/011d/slideshow/_A7R9702-HDR_HUNDVEN-CLEMENTS_PHOTOGRAPHY.jpg?1574940024",
 		"https://images.adsttc.com/media/images/5fd1/63ba/63c0/17e8/4500/0025/slideshow/LBCC_Library60643.jpg?1607557956",
 		"https://archello.s3.eu-central-1.amazonaws.com/images/2021/03/03/g.o.-architecture-the-small--green-library-community-centres-archello.1614730542.5493.jpg",
@@ -251,16 +260,34 @@ func SeedLibraryCollection() {
 	sn := 8801
 
 	for i := 0; i < 6; i++ {
-		for j := 0; j < 10; j++ {
+		for j := 0; j < 100; j++ {
 			sn++
 			data = append(data, LibraryCollection{
 				SerialNumber: fmt.Sprintf("1234.23.12.%d", sn),
 				LibraryID:    i + 1,
-				BookID:       rand.Intn(23) + 1,
+				BookID:       rand.Intn(47) + 1,
 				Availability: true,
 				Status:       rand.Intn(4) + 1,
 			})
 		}
+	}
+	DB.Create(&data)
+}
+
+func SeedLibraryCollectionBorrow() {
+	var data []LibraryCollectionBorrow
+	currentTime := time.Now()
+	rand.Seed(currentTime.UnixNano())
+
+	for i := 0; i < 200; i++ {
+		randDate := utility.DateRandom("2021-01-01", "2022-07-01")
+		data = append(data, LibraryCollectionBorrow{
+			CreatedAt:    datatypes.Date(randDate),
+			TakedAt:      datatypes.Date(randDate.Add(24 * time.Hour)),
+			ReturnedAt:   datatypes.Date(randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)),
+			CollectionID: rand.Intn(600) + 1,
+			UserID:       rand.Intn(23) + 8,
+		})
 	}
 	DB.Create(&data)
 }
@@ -295,7 +322,22 @@ func SeedLibraryPaperPermission() {
 			PaperID:     rand.Intn(60) + 1,
 			UserID:      rand.Intn(23) + 8,
 			RedirectUrl: "https://drive.google.com/file/d/0B4eE3EAAsV6jaXg5SXQweDUyc28/view?resourcekey=0-QeSPnTIRa2FWntQ-9ev6wQ",
+			Purpose:     gofakeit.LoremIpsumSentence(10),
+			Accepted:    (rand.Intn(2) == 0),
 		})
 	}
-	DB.Create((&data))
+	DB.Create(&data)
+}
+
+func SeedLibraryPaperAccess() {
+	var data []LibraryPaperAccess
+	currentTime := time.Now()
+	rand.Seed(currentTime.UnixNano())
+	for i := 0; i < 200; i++ {
+		data = append(data, LibraryPaperAccess{
+			CreatedAt:    datatypes.Date(utility.DateRandom("2021-01-01", "2022-07-01")),
+			PermissionID: rand.Intn(60) + 1,
+		})
+	}
+	DB.Create(&data)
 }

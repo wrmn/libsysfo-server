@@ -45,6 +45,8 @@ func testSeedBook(w http.ResponseWriter, r *http.Request) {
 func testSeedLibrary(w http.ResponseWriter, r *http.Request) {
 	database.SeedLibraryData()
 	database.SeedLibraryCollection()
+	database.SeedLibraryCollectionBorrow()
 	database.SeedLibraryPaper()
 	database.SeedLibraryPaperPermission()
+	database.SeedLibraryPaperAccess()
 }

@@ -2,11 +2,14 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"libsysfo-server/utility/cred"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
 
@@ -43,6 +46,22 @@ func intServerError(w http.ResponseWriter, err error) {
 	}.responseFormatter(w)
 }
 
+func authVerification(r *http.Request) (tokenData *jwt.Token, err error) {
+	tokenHeader := r.Header.Values("Authorization")
+	if len(tokenHeader) == 0 {
+		err = errors.New("authorization required")
+		return
+	}
+	token := strings.Split(tokenHeader[0], " ")
+	if token[0] != "Bearer" {
+		err = errors.New("need bearer authorization")
+		return
+	}
+	tokenData, err = cred.VerifyToken(token[1])
+	return
+
+}
+
 func paginator(r *http.Request, limit int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		q := r.URL.Query()
@@ -69,6 +88,40 @@ func bookFilter(r *http.Request, limit int) func(db *gorm.DB) *gorm.DB {
 			keyword := fmt.Sprintf("%%%s%%", strings.ToLower(q.Get("keyword")))
 			db = db.Where("LOWER(title) like ?", keyword).
 				Or("LOWER(author) like ?", keyword)
+		}
+		return db
+	}
+}
+
+func bookDetailFilter(r *http.Request) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		q := r.URL.Query()
+
+		if q.Has("language") {
+			if q.Has("category") {
+				category := fmt.Sprintf("%%%s%%", strings.ToLower(q.Get("category")))
+				db = db.Where("LOWER(language) = ? AND LOWER(category) = ?", strings.ToLower(q.Get("language")), category)
+				return db
+			}
+			db = db.Where("LOWER(language) = ? ", strings.ToLower(q.Get("language")))
+			return db
+		} else if q.Has("category") {
+			category := fmt.Sprintf("%%%s%%", strings.ToLower(q.Get("category")))
+			db = db.Where("LOWER(category) like ? ", category)
+			return db
+		}
+		return db
+	}
+}
+
+func paperFilter(r *http.Request) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		q := r.URL.Query()
+		if q.Has("keyword") {
+			keyword := fmt.Sprintf("%%%s%%", strings.ToLower(q.Get("keyword")))
+			db = db.Where("LOWER(title) like ?", keyword).
+				Or("array_to_string(subject, ',', ' ') like ?", keyword).
+				Or("description::TEXT like ?", keyword)
 		}
 		return db
 	}

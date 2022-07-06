@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/brianvoe/gofakeit/v6 v6.16.0
+	github.com/codedius/imagekit-go v1.1.3
 	github.com/fatih/color v1.13.0
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gorilla/mux v1.8.0

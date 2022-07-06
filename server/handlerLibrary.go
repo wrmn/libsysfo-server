@@ -118,10 +118,10 @@ func singleLibrary(w http.ResponseWriter, r *http.Request) {
 				ImagesMain:           result.ImagesMain,
 				ImagesContent:        result.ImagesContent,
 				TotalBookCollection:  bookCount,
-				BookCollection:       &bookData,
 				TotalPaperCollection: paperCount,
-				PaperCollection:      &paperData,
 			},
+			Book:  &bookData,
+			Paper: &paperData,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
@@ -138,14 +138,13 @@ func allPapers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := []database.LibraryPaper{}
-	database.DB.Scopes(paginator(r, 24)).Find(&data)
-	var paperRespBody []paperResponse
+	database.DB.Scopes(paginator(r, 24), paperFilter(r)).Find(&data)
+	paperRespBody := []paperResponse{}
 	for _, e := range data {
 		paperRespBody = append(paperRespBody, paperResponse{
 			Id:          e.ID,
 			Title:       e.Title,
 			Subject:     e.Subject,
-			Abstract:    e.Abstract,
 			Issn:        e.Issn,
 			Description: e.Description,
 			Access:      e.Access,
@@ -174,12 +173,19 @@ func singlePaper(w http.ResponseWriter, r *http.Request) {
 	paperId := mux.Vars(r)["id"]
 
 	result := database.LibraryPaper{}
-	query := database.DB.Where("Id = ?", paperId).Find(&result)
-	err := query.Error
+	err := database.DB.Where("Id = ?", paperId).Find(&result).Error
 	if err != nil {
 		intServerError(w, err)
 		return
 	}
+
+	libraryResult := database.LibraryData{}
+	err = database.DB.Where("Id = ?", result.LibraryID).Find(&libraryResult).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
 	response{
 		Data: responseBody{
 			Paper: paperResponse{
@@ -190,6 +196,12 @@ func singlePaper(w http.ResponseWriter, r *http.Request) {
 				Issn:        result.Issn,
 				Description: result.Description,
 				Access:      result.Access,
+			},
+			Library: libraryResponse{
+				Id:         libraryResult.ID,
+				Name:       libraryResult.Name,
+				Address:    libraryResult.Address,
+				Coordinate: libraryResult.Coordinate,
 			},
 		},
 		Status:      http.StatusOK,

@@ -36,6 +36,7 @@ type LibraryCollection struct {
 type LibraryCollectionBorrow struct {
 	ID           int               `json:"id" gorm:"type:int;primaryKey;size:32"`
 	CreatedAt    datatypes.Date    `json:"createdAt" gorm:"type:timestamp"`
+	TakedAt      datatypes.Date    `json:"takedAt" gorm:"type:timestamp"`
 	ReturnedAt   datatypes.Date    `json:"returnedAt" gorm:"type:timestamp"`
 	CollectionID int               `gorm:"type:int;size:32;autoIncrement:false"`
 	Collection   LibraryCollection `json:"collection" gorm:"foreignKey:CollectionID"`
@@ -66,6 +67,8 @@ type LibraryPaperPermission struct {
 	UserID      int            `gorm:"type:int;size:32;autoIncrement:false"`
 	User        ProfileAccount `json:"user" gorm:"foreignKey:UserID"`
 	RedirectUrl string         `json:"redirectUrl" gorm:"type:varchar(128)"`
+	Purpose     string         `json:"purpose" gorm:"type:varchar(128)"`
+	Accepted    bool           `json:"access"`
 }
 
 type LibraryPaperAccess struct {

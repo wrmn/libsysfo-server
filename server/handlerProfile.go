@@ -190,3 +190,102 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 	err = emailBody.SendEmail(receiver)
 	return
 }
+
+func profileInformation(w http.ResponseWriter, r *http.Request) {
+	tokenData, err := authVerification(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	data := database.ProfileAccount{}
+	cred := tokenData.Claims.(*cred.TokenModel)
+	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
+		Preload("ProfileData").First(&data)
+
+	response{
+		Data: responseBody{
+			Profile: profileResponse{
+				Username:     data.Username,
+				Email:        data.Email,
+				Verified:     data.ProfileData.VerifiedAt,
+				Name:         data.ProfileData.Name,
+				Gender:       data.ProfileData.Gender,
+				PlaceOfBirth: data.ProfileData.PlaceOfBirth,
+				DateOfBirth:  data.ProfileData.DateOfBirth,
+				Address:      data.ProfileData.Address1,
+				Institution:  data.ProfileData.Institution,
+				Profession:   data.ProfileData.Profession,
+				PhoneNo:      data.ProfileData.PhoneNo,
+				IsWhatsapp:   data.ProfileData.IsWhatsapp,
+				Images:       data.ProfileData.Images,
+			},
+		},
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "success",
+	}.responseFormatter(w)
+}
+
+func profileBorrow(w http.ResponseWriter, r *http.Request) {
+	tokenData, err := authVerification(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	data := database.ProfileAccount{}
+	cred := tokenData.Claims.(*cred.TokenModel)
+	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
+		Preload("ProfileData").First(&data)
+
+	borrowData := []database.LibraryCollectionBorrow{}
+	database.DB.Where("user_id = ?", data.ID).
+		Preload("Collection").Find(&borrowData)
+
+	response{
+		Data: responseBody{
+			Borrow: borrowData,
+		},
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "success",
+	}.responseFormatter(w)
+}
+
+func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
+	tokenData, err := authVerification(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	data := database.ProfileAccount{}
+	cred := tokenData.Claims.(*cred.TokenModel)
+	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
+		Preload("ProfileData").First(&data)
+
+	permissionRespBody := []profilePermissionResponse{}
+	permissionData := []database.LibraryPaperPermission{}
+	database.DB.Where("user_id = ?", data.ID).
+		Preload("Paper.Library").Find(&permissionData)
+
+	for _, d := range permissionData {
+		permissionRespBody = append(permissionRespBody, profilePermissionResponse{
+			CreatedAt:    d.CreatedAt,
+			PaperUrl:     d.RedirectUrl,
+			PaperTitle:   d.Paper.Title,
+			PaperSubject: d.Paper.Subject,
+			PaperIssn:    d.Paper.Issn,
+			Library:      d.Paper.Library.Name,
+		})
+	}
+
+	response{
+		Data: responseBody{
+			Permission: permissionRespBody,
+		},
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "success",
+	}.responseFormatter(w)
+}

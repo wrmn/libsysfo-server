@@ -2,9 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"libsysfo-server/database"
+	bookserver "libsysfo-server/utility/book-server"
 	"net/http"
 	"net/url"
 	"os"
@@ -14,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func serverEndpoint(path string) (template interface{}, err error) {
+func serverEndpoint(path string) (template bookserver.BookResponse, err error) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
@@ -29,6 +31,9 @@ func serverEndpoint(path string) (template interface{}, err error) {
 		return
 	}
 	defer response.Body.Close()
+	if response.StatusCode != 200 {
+		err = errors.New("server unavailable")
+	}
 
 	b, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -62,20 +67,21 @@ func allBooks(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			result := data.(map[string]interface{})["books"].([]interface{})
+			result := data.Books
 			for _, r := range result {
-				d := r.(map[string]interface{})
 				bookRespBody = append(bookRespBody, bookResponse{
-					Title:  d["title"].(string),
-					Image:  d["image"].(string),
-					Author: d["author"].(string),
-					Slug:   d["slug"].(string),
+					Title:  *r.Title,
+					Image:  *r.Image,
+					Author: *r.Author,
+					Slug:   *r.Slug,
+					Source: "gramedia",
 				})
 			}
 		} else if q.Get("source") == "local" {
-
-			database.DB.Scopes(bookFilter(r, 10)).Preload("BookDetail").Find(&data)
-			bookRespBody = localBookGenerate(data, bookRespBody)
+			database.DB.Table("books").
+				Scopes(bookFilter(r, 10), bookDetailFilter(r)).
+				Joins("left join book_details on books.id = book_details.id").
+				Scan(&bookRespBody)
 		}
 	} else {
 		if page == 0 {
@@ -84,7 +90,6 @@ func allBooks(w http.ResponseWriter, r *http.Request) {
 
 		count := int(database.DB.
 			Find(&[]database.Book{}).RowsAffected / 24)
-		data := []database.Book{}
 		database.DB.Scopes(paginator(r, 24)).Preload("BookDetail").Find(&data)
 
 		bookRespBody = localBookGenerate(data, bookRespBody)
@@ -97,14 +102,14 @@ func allBooks(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			result := data.(map[string]interface{})["books"].([]interface{})
+			result := data.Books
 			for _, r := range result {
-				d := r.(map[string]interface{})
 				bookRespBody = append(bookRespBody, bookResponse{
-					Title:  d["title"].(string),
-					Image:  d["image"].(string),
-					Author: d["author"].(string),
-					Slug:   d["slug"].(string),
+					Title:  *r.Title,
+					Image:  *r.Image,
+					Author: *r.Author,
+					Slug:   *r.Slug,
+					Source: "gramedia",
 				})
 			}
 		}
@@ -135,11 +140,15 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 	}
 	exist := query.RowsAffected
 	bookRespBody := bookResponse{}
+	subResult := []database.LibraryCollection{}
+	libRespBody := []libraryCollectionResponse{}
+
 	if exist != 0 {
 		bookRespBody.Title = result.Title
 		bookRespBody.Image = result.Image
 		bookRespBody.Author = result.Author
 		bookRespBody.Slug = result.Slug
+		bookRespBody.Source = result.Source
 		bookRespBody.ReleaseDate = result.BookDetail.ReleaseDate
 		bookRespBody.Description = result.BookDetail.Description
 		bookRespBody.Language = result.BookDetail.Language
@@ -148,7 +157,6 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 		bookRespBody.Publisher = result.BookDetail.Publisher
 		bookRespBody.Category = result.BookDetail.Category
 
-		subResult := []database.LibraryCollection{}
 		err = database.DB.
 			Preload("Library").
 			Where("book_id = ?", result.ID).
@@ -157,7 +165,6 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 			intServerError(w, err)
 			return
 		}
-		var libRespBody []libraryCollectionResponse
 		for _, e := range subResult {
 			libRespBody = append(libRespBody, libraryCollectionResponse{
 				LibraryId:    e.LibraryID,
@@ -169,7 +176,6 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
-		bookRespBody.AvailableOn = &libRespBody
 	} else {
 		path := fmt.Sprintf("/api/books/%s/detail", slug)
 		data, err := serverEndpoint(path)
@@ -177,24 +183,26 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 			intServerError(w, err)
 			return
 		}
-		result := data.(map[string]interface{})["book"].(map[string]interface{})
-		details := result["detail"].(map[string]interface{})
-		bookRespBody.Title = result["title"].(string)
-		bookRespBody.Image = result["image"].(string)
-		bookRespBody.Author = result["author"].(string)
-		bookRespBody.Slug = result["slug"].(string)
-		bookRespBody.ReleaseDate = details["release_date"].(string)
-		bookRespBody.Description = details["description"].(string)
-		bookRespBody.Language = details["language"].(string)
-		bookRespBody.Country = details["country"].(string)
-		bookRespBody.PageCount = details["page_count"].(float64)
-		bookRespBody.Publisher = details["publisher"].(string)
-		bookRespBody.Category = details["category"].(string)
-		bookRespBody.Origin = result["original_url"].(string)
+		result := data.Book
+		details := result.Detail
+		bookRespBody.Title = *result.Title
+		bookRespBody.Image = *result.Image
+		bookRespBody.Author = *result.Author
+		bookRespBody.Slug = *result.Slug
+		bookRespBody.Source = "gramedia"
+		bookRespBody.ReleaseDate = *details.ReleaseDate
+		bookRespBody.Description = *details.Description
+		bookRespBody.Language = *details.Language
+		bookRespBody.Country = *details.Country
+		bookRespBody.PageCount = *details.PageCount
+		bookRespBody.Publisher = *details.Publisher
+		bookRespBody.Category = *details.Category
+		bookRespBody.Origin = *result.OriginalURL
 	}
 	response{
 		Data: responseBody{
-			Book: bookRespBody,
+			Book:       bookRespBody,
+			Collection: libRespBody,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
