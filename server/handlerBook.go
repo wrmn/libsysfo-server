@@ -33,6 +33,7 @@ func serverEndpoint(path string) (template bookserver.BookResponse, err error) {
 	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		err = errors.New("server unavailable")
+		return
 	}
 
 	b, err := ioutil.ReadAll(response.Body)

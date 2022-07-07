@@ -8,6 +8,7 @@ import (
 	"libsysfo-server/database"
 	"libsysfo-server/utility/cred"
 	"libsysfo-server/utility/email"
+	"libsysfo-server/utility/imgkit"
 	"net/http"
 	"time"
 
@@ -148,6 +149,18 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 	lastAcc := database.ProfileAccount{}
 	database.DB.Last(&lastAcc)
 	password := gofakeit.Gamertag()
+
+	img := imgkit.ImgInformation{
+		File:     data["picture"].(string),
+		FileName: "profile",
+		Folder:   fmt.Sprintf("/user/%d/", lastAcc.ID+1),
+	}
+
+	upr, err := img.UploadImage()
+	if err != nil {
+		return
+	}
+
 	user := database.ProfileAccount{
 		ID:          lastAcc.ID + 1,
 		Email:       data["email"].(string),
@@ -159,7 +172,7 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 		UserID:     lastAcc.ID + 1,
 		Name:       data["name"].(string),
 		IsWhatsapp: false,
-		Images:     data["picture"].(string),
+		Images:     upr.URL,
 	}
 
 	tokenResult, err := cred.CreateToken(user)
@@ -202,6 +215,9 @@ func profileInformation(w http.ResponseWriter, r *http.Request) {
 	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
 		Preload("ProfileData").First(&data)
 
+	permissionData := searchPermission(data.ID)
+	borrowData := searchBorrow(data.ID)
+
 	response{
 		Data: responseBody{
 			Profile: profileResponse{
@@ -219,6 +235,8 @@ func profileInformation(w http.ResponseWriter, r *http.Request) {
 				IsWhatsapp:   data.ProfileData.IsWhatsapp,
 				Images:       data.ProfileData.Images,
 			},
+			Permission: permissionData,
+			Borrow:     borrowData,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
@@ -238,9 +256,7 @@ func profileBorrow(w http.ResponseWriter, r *http.Request) {
 	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
 		Preload("ProfileData").First(&data)
 
-	borrowData := []database.LibraryCollectionBorrow{}
-	database.DB.Where("user_id = ?", data.ID).
-		Preload("Collection").Find(&borrowData)
+	borrowData := searchBorrow(data.ID)
 
 	response{
 		Data: responseBody{
@@ -264,28 +280,113 @@ func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
 	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
 		Preload("ProfileData").First(&data)
 
-	permissionRespBody := []profilePermissionResponse{}
-	permissionData := []database.LibraryPaperPermission{}
-	database.DB.Where("user_id = ?", data.ID).
-		Preload("Paper.Library").Find(&permissionData)
+	permissionData := searchPermission(data.ID)
 
-	for _, d := range permissionData {
-		permissionRespBody = append(permissionRespBody, profilePermissionResponse{
+	response{
+		Data: responseBody{
+			Permission: permissionData,
+		},
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "success",
+	}.responseFormatter(w)
+}
+
+func searchPermission(id int) (respBody []profilePermissionResponse) {
+	data := []database.LibraryPaperPermission{}
+	database.DB.Where("user_id = ?", id).
+		Preload("Paper.Library").Find(&data)
+
+	for _, d := range data {
+		respBody = append(respBody, profilePermissionResponse{
 			CreatedAt:    d.CreatedAt,
 			PaperUrl:     d.RedirectUrl,
 			PaperTitle:   d.Paper.Title,
 			PaperSubject: d.Paper.Subject,
 			PaperIssn:    d.Paper.Issn,
 			Library:      d.Paper.Library.Name,
+			Purpose:      d.Purpose,
+			Accepted:     d.Accepted,
 		})
 	}
+	return
+}
+
+func searchBorrow(id int) (respBody []profileCollectionBorrow) {
+
+	data := []database.LibraryCollectionBorrow{}
+	database.DB.Where("user_id = ?", id).
+		Preload("Collection.Library").Preload("Collection.Book").Find(&data)
+
+	for _, d := range data {
+		respBody = append(respBody, profileCollectionBorrow{
+			CreatedAt:    d.CreatedAt,
+			TakedAt:      d.TakedAt,
+			ReturnedAt:   d.ReturnedAt,
+			Title:        d.Collection.Book.Title,
+			SerialNumber: d.Collection.SerialNumber,
+			Slug:         d.Collection.Book.Slug,
+			LibraryId:    d.Collection.LibraryID,
+			Library:      d.Collection.Library.Name,
+		})
+	}
+	return
+}
+
+func updatePassword(w http.ResponseWriter, r *http.Request) {
+	var e profilePwdUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
+	tokenData, err := authVerification(r)
+
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	cred := tokenData.Claims.(*cred.TokenModel)
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	if e.Password != e.RetypePassword {
+		badRequest(w, "incorrect retype password")
+		return
+	}
+
+	e.OldPassword = fmt.Sprintf("%x", md5.Sum([]byte(e.OldPassword)))
+	e.Password = fmt.Sprintf("%x", md5.Sum([]byte(e.Password)))
+
+	user := database.ProfileAccount{}
+
+	result := database.DB.
+		Where("email = ? AND password = ?", cred.Email, e.OldPassword).
+		Or("username = ? AND password = ?", cred.Username, e.OldPassword).
+		Find(&user)
+
+	if result.RowsAffected == 0 {
+		err := errors.New("invalid password")
+		unauthorizedRequest(w, err)
+		return
+	} else if user.AccountType != 3 {
+		err := errors.New("user not allowed")
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	user.Password = e.Password
+	database.DB.Save(&user)
 
 	response{
-		Data: responseBody{
-			Permission: permissionRespBody,
-		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
-		Description: "success",
+		Description: "Password changed",
 	}.responseFormatter(w)
 }

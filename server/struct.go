@@ -21,7 +21,7 @@ type responseBody struct {
 	Collection interface{} `json:"collection,omitempty"`
 	Paper      interface{} `json:"paper,omitempty"`
 	Borrow     interface{} `json:"borrow,omitempty"`
-	Permission interface{} `json:"access,omitempty"`
+	Permission interface{} `json:"permission,omitempty"`
 	Token      string      `json:"token,omitempty"`
 	Paginate   *paginate   `json:"paginate,omitempty"`
 }
@@ -104,4 +104,23 @@ type profilePermissionResponse struct {
 	PaperSubject []string  `json:"subject"`
 	PaperIssn    string    `json:"issn"`
 	Library      string    `json:"libraryName"`
+	Purpose      string    `json:"purpose"`
+	Accepted     bool      `json:"accepted"`
+}
+
+type profileCollectionBorrow struct {
+	CreatedAt    time.Time  `json:"createdAt"`
+	TakedAt      *time.Time `json:"takedAt"`
+	ReturnedAt   *time.Time `json:"returnedAt"`
+	Title        string     `json:"title"`
+	SerialNumber string     `json:"serialNumber"`
+	Slug         string     `json:"slug"`
+	LibraryId    int        `json:"libraryId"`
+	Library      string     `json:"libraryName"`
+}
+
+type profilePwdUpdateRequest struct {
+	OldPassword    string `json:"oldPassword"`
+	Password       string `json:"password"`
+	RetypePassword string `json:"retypePassword"`
 }

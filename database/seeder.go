@@ -281,10 +281,12 @@ func SeedLibraryCollectionBorrow() {
 
 	for i := 0; i < 200; i++ {
 		randDate := utility.DateRandom("2021-01-01", "2022-07-01")
+		takedDate := randDate.Add(24 * time.Hour)
+		returnedDate := randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)
 		data = append(data, LibraryCollectionBorrow{
-			CreatedAt:    datatypes.Date(randDate),
-			TakedAt:      datatypes.Date(randDate.Add(24 * time.Hour)),
-			ReturnedAt:   datatypes.Date(randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)),
+			CreatedAt:    randDate,
+			TakedAt:      &takedDate,
+			ReturnedAt:   &returnedDate,
 			CollectionID: rand.Intn(600) + 1,
 			UserID:       rand.Intn(23) + 8,
 		})

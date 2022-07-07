@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -35,9 +37,9 @@ type LibraryCollection struct {
 
 type LibraryCollectionBorrow struct {
 	ID           int               `json:"id" gorm:"type:int;primaryKey;size:32"`
-	CreatedAt    datatypes.Date    `json:"createdAt" gorm:"type:timestamp"`
-	TakedAt      datatypes.Date    `json:"takedAt" gorm:"type:timestamp"`
-	ReturnedAt   datatypes.Date    `json:"returnedAt" gorm:"type:timestamp"`
+	CreatedAt    time.Time         `json:"createdAt" gorm:"type:timestamp"`
+	TakedAt      *time.Time        `json:"takedAt" gorm:"type:timestamp"`
+	ReturnedAt   *time.Time        `json:"returnedAt" gorm:"type:timestamp"`
 	CollectionID int               `gorm:"type:int;size:32;autoIncrement:false"`
 	Collection   LibraryCollection `json:"collection" gorm:"foreignKey:CollectionID"`
 	UserID       int               `gorm:"type:int;size:32;autoIncrement:false"`
