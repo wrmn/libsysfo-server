@@ -10,6 +10,7 @@ import (
 	"libsysfo-server/utility/email"
 	"libsysfo-server/utility/imgkit"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -147,7 +148,7 @@ func emailValidate(w http.ResponseWriter, r *http.Request) {
 
 func googleRegisterHandler(data map[string]interface{}) (err error) {
 	lastAcc := database.ProfileAccount{}
-	database.DB.Last(&lastAcc)
+	database.DB.Order("id desc").First(&lastAcc)
 	password := gofakeit.Gamertag()
 
 	img := imgkit.ImgInformation{
@@ -180,7 +181,10 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 		return
 	}
 
-	database.DB.Create(&user)
+	err = database.DB.Create(&user).Error
+	if err != nil {
+		return
+	}
 	//NOTE: change to deployed url server
 	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult)
 	fmt.Println(link)
@@ -361,22 +365,9 @@ func updatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.OldPassword = fmt.Sprintf("%x", md5.Sum([]byte(e.OldPassword)))
 	e.Password = fmt.Sprintf("%x", md5.Sum([]byte(e.Password)))
-
-	user := database.ProfileAccount{}
-
-	result := database.DB.
-		Where("email = ? AND password = ?", cred.Email, e.OldPassword).
-		Or("username = ? AND password = ?", cred.Username, e.OldPassword).
-		Find(&user)
-
-	if result.RowsAffected == 0 {
-		err := errors.New("invalid password")
-		unauthorizedRequest(w, err)
-		return
-	} else if user.AccountType != 3 {
-		err := errors.New("user not allowed")
+	user, err := findUser(cred, e.OldPassword)
+	if err != nil {
 		unauthorizedRequest(w, err)
 		return
 	}
@@ -388,5 +379,188 @@ func updatePassword(w http.ResponseWriter, r *http.Request) {
 		Status:      http.StatusOK,
 		Reason:      "Ok",
 		Description: "Password changed",
+	}.responseFormatter(w)
+}
+
+func updateEmail(w http.ResponseWriter, r *http.Request) {
+	var e profileEmailUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
+	tokenData, err := authVerification(r)
+
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	cred := tokenData.Claims.(*cred.TokenModel)
+	pwd, err := pwdLocator(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	user, err := findUser(cred, pwd)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	user.Email = e.Email
+	err = database.DB.Save(&user).Error
+	if err != nil {
+		badRequest(w, "email has been used")
+		return
+	}
+
+	loginHandler(w, user)
+}
+
+func updateUsername(w http.ResponseWriter, r *http.Request) {
+	var e profileUsernameUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
+	tokenData, err := authVerification(r)
+
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	cred := tokenData.Claims.(*cred.TokenModel)
+	pwd, err := pwdLocator(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	user, err := findUser(cred, pwd)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	user.Username = e.Username
+	err = database.DB.Save(&user).Error
+	if err != nil {
+		badRequest(w, "username has been used")
+		return
+	}
+
+	loginHandler(w, user)
+}
+
+func updatePicture(w http.ResponseWriter, r *http.Request) {
+	var e profilePictureUpdateRequest
+	tokenData, err := authVerification(r)
+
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	cred := tokenData.Claims.(*cred.TokenModel)
+	pwd, err := pwdLocator(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	user, err := findUser(cred, pwd)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&e)
+	if err != nil {
+		badRequest(w, err.Error())
+		return
+	}
+
+	img := imgkit.ImgInformation{
+		File:     e.Picture,
+		FileName: "profile",
+		Folder:   fmt.Sprintf("/user/%d/", user.ID),
+	}
+
+	upr, err := img.UploadImage()
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	userData, err := findUserData(user.ID)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	userData.Images = upr.URL
+	fmt.Println(upr.URL)
+
+	err = database.DB.Save(&userData).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	loginHandler(w, user)
+}
+
+func resendEmail(w http.ResponseWriter, r *http.Request) {
+	tokenData, err := authVerification(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	tokenResult := strings.Split(r.Header.Values("Authorization")[0], " ")
+	//NOTE: change to deployed url server
+	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult[1])
+	fmt.Println(link)
+	content := fmt.Sprintf("<html><head></head><body><p>Hello,</p>Segera menuju <a href='%s'>link</a> ini untuk verifikasi akun anda</body>	</html>",
+		link,
+	)
+
+	emailBody := email.Content{
+		Subject:     "Email Verification",
+		HtmlContent: content,
+	}
+
+	receiver := email.ToData{
+		Name:  "Libsysfo user",
+		Email: tokenData.Claims.(*cred.TokenModel).Email,
+	}
+
+	err = emailBody.SendEmail(receiver)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	response{
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Email send",
 	}.responseFormatter(w)
 }

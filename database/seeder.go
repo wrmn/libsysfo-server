@@ -22,9 +22,10 @@ func SeedProfileAccount() {
 	data := []ProfileAccount{}
 
 	for c := 0; c < 30; c++ {
+		uname := strings.ToLower(gofakeit.Gamertag())
 		singelData := ProfileAccount{
 			ID:       c + 1,
-			Username: strings.ToLower(gofakeit.Gamertag()),
+			Username: &uname,
 			Email:    strings.ToLower(gofakeit.Email()),
 			Password: "f5bb0c8de146c67b44babbf4e6584cc0",
 		}

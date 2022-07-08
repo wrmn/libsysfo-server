@@ -82,7 +82,7 @@ type paperResponse struct {
 }
 
 type profileResponse struct {
-	Username     string      `json:"username,omitempty"`
+	Username     *string     `json:"username,omitempty"`
 	Email        string      `json:"email,omitempty"`
 	Verified     interface{} `json:"verivied,omitempty"`
 	Name         string      `json:"name,omitempty"`
@@ -123,4 +123,16 @@ type profilePwdUpdateRequest struct {
 	OldPassword    string `json:"oldPassword"`
 	Password       string `json:"password"`
 	RetypePassword string `json:"retypePassword"`
+}
+
+type profileEmailUpdateRequest struct {
+	Email string `json:"newEmail"`
+}
+
+type profileUsernameUpdateRequest struct {
+	Username *string `json:"newUsername"`
+}
+
+type profilePictureUpdateRequest struct {
+	Picture []byte `json:"newPicture"`
 }

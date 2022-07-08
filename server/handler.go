@@ -1,9 +1,11 @@
 package server
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"libsysfo-server/database"
 	"libsysfo-server/utility/cred"
 	"net/http"
 	"strconv"
@@ -59,7 +61,16 @@ func authVerification(r *http.Request) (tokenData *jwt.Token, err error) {
 	}
 	tokenData, err = cred.VerifyToken(token[1])
 	return
+}
 
+func pwdLocator(r *http.Request) (pwd string, err error) {
+	pwdHead := r.Header.Values("Account-auth")
+	if len(pwdHead) == 0 {
+		err = errors.New("authorization required")
+		return
+	}
+	pwd = pwdHead[0]
+	return
 }
 
 func paginator(r *http.Request, limit int) func(db *gorm.DB) *gorm.DB {
@@ -137,6 +148,35 @@ func (data paginate) generate(r *http.Request, page int) (result paginate) {
 	result.Data = data.Data
 	if result.Data != 0 {
 		result.Next = link + strconv.Itoa(page+1)
+	}
+	return
+}
+
+func findUser(cred *cred.TokenModel, pwd string) (user database.ProfileAccount, err error) {
+	password := fmt.Sprintf("%x", md5.Sum([]byte(pwd)))
+	result := database.DB.
+		Where("email = ? AND password = ?", cred.Email, password).
+		Or("username = ? AND password = ?", cred.Username, password).
+		Find(&user)
+
+	if result.RowsAffected == 0 {
+		err = errors.New("invalid password")
+		return
+	} else if user.AccountType != 3 {
+		err = errors.New("user not allowed")
+		return
+	}
+	return
+}
+
+func findUserData(id int) (user database.ProfileData, err error) {
+	result := database.DB.
+		Where("user_id = ?", id).
+		Find(&user)
+
+	if result.RowsAffected == 0 {
+		err = errors.New("user not found")
+		return
 	}
 	return
 }

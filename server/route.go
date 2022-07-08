@@ -13,7 +13,7 @@ func Serve(port string) {
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "POST"},
-		AllowedHeaders: []string{"Authorization", "Content-Type"},
+		AllowedHeaders: []string{"Authorization", "Content-Type", "Account-auth"},
 	})
 
 	r := mux.NewRouter()
@@ -29,6 +29,10 @@ func Serve(port string) {
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")
 	r.HandleFunc("/profile/login/google", loginGoogle).Methods("POST")
 	r.HandleFunc("/profile/update/password", updatePassword).Methods("POST")
+	r.HandleFunc("/profile/update/email", updateEmail).Methods("POST")
+	r.HandleFunc("/profile/update/picture", updatePicture).Methods("POST")
+	r.HandleFunc("/profile/update/username", updateUsername).Methods("POST")
+	r.HandleFunc("/profile/validate/resend", resendEmail).Methods("GET")
 	r.HandleFunc("/profile/permission", profileAccessPermission).Methods("GET")
 	r.HandleFunc("/profile/validate", emailValidate).Methods("GET")
 

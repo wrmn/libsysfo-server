@@ -27,7 +27,7 @@ type GoogleAuthClaims struct {
 
 type TokenModel struct {
 	jwt.RegisteredClaims
-	Username    string `json:"username"`
-	Email       string `json:"email"`
-	AccountType int    `json:"accountType"`
+	Username    *string `json:"username"`
+	Email       string  `json:"email"`
+	AccountType int     `json:"accountType"`
 }

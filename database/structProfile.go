@@ -10,7 +10,7 @@ import (
 type ProfileAccount struct {
 	gorm.Model
 	ID          int         `json:"id" gorm:"type:int;primaryKey;size:32"`
-	Username    string      `json:"username" gorm:"type:varchar(32);unique"`
+	Username    *string     `json:"username" gorm:"type:varchar(32);unique"`
 	Email       string      `json:"email" gorm:"type:varchar(64);unique;not null"`
 	AccountType int         `json:"accountType" gorm:"type:int;size:32"`
 	Password    string      `json:"password,omitempty" gorm:"type:char(32);not null"`
