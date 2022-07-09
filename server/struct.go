@@ -92,6 +92,7 @@ type profileResponse struct {
 	Address      *string     `json:"address,omitempty"`
 	Institution  *string     `json:"institution,omitempty"`
 	Profession   *string     `json:"profession,omitempty"`
+	PhoneCode    *string     `json:"phoneCode,omitempty"`
 	PhoneNo      *string     `json:"phoneNo,omitempty"`
 	IsWhatsapp   bool        `json:"isWhatsapp,omitempty"`
 	Images       string      `json:"images,omitempty"`
@@ -135,4 +136,17 @@ type profileUsernameUpdateRequest struct {
 
 type profilePictureUpdateRequest struct {
 	Picture []byte `json:"newPicture"`
+}
+
+type profileUpdateRequest struct {
+	Name         string  `json:"name,omitempty"`
+	Gender       *string `json:"gender,omitempty"`
+	PlaceOfBirth *string `json:"placeOfBirth,omitempty"`
+	DateOfBirth  *string `json:"dateOfBirth,omitempty"`
+	Address      *string `json:"address,omitempty"`
+	Institution  *string `json:"institution,omitempty"`
+	Profession   *string `json:"profession,omitempty"`
+	PhoneCode    *string `json:"phoneCode,omitempty"`
+	PhoneNo      *string `json:"phoneNo,omitempty"`
+	IsWhatsapp   bool    `json:"isWhatsapp,omitempty"`
 }

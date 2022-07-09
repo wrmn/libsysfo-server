@@ -54,6 +54,7 @@ func SeedProfileData() {
 		job.Title = strings.ToLower(job.Title)
 		job.Company = strings.ToLower(job.Company)
 		phoneNumber := gofakeit.Phone()
+		phoneCode := "+62"
 		singleData := ProfileData{
 			UserID:       c + 1,
 			Name:         gofakeit.Name(),
@@ -63,6 +64,7 @@ func SeedProfileData() {
 			Address1:     &(gofakeit.Address().Address),
 			Profession:   &(job.Title),
 			Institution:  &(job.Company),
+			PhoneCode:    &(phoneCode),
 			PhoneNo:      &(phoneNumber),
 			IsWhatsapp:   (rand.Intn(2) == 0),
 			Images:       "https://i0.wp.com/global.ac.id/wp-content/uploads/2015/04/speaker-3-v2.jpg?fit=768%2C768&ssl=1",

@@ -2,7 +2,9 @@ package imgkit
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/codedius/imagekit-go"
 )
@@ -17,9 +19,11 @@ func (data ImgInformation) UploadImage() (upr *imagekit.UploadResponse, err erro
 	if err != nil {
 		return
 	}
+	t := time.Now().UnixMilli()
+	filename := fmt.Sprintf("%d-%s", t, data.FileName)
 	ur := imagekit.UploadRequest{
 		File:              data.File,
-		FileName:          data.FileName,
+		FileName:          filename,
 		UseUniqueFileName: false,
 		Tags:              []string{"testing", "test"},
 		Folder:            data.Folder,

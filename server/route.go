@@ -31,6 +31,7 @@ func Serve(port string) {
 	r.HandleFunc("/profile/update/password", updatePassword).Methods("POST")
 	r.HandleFunc("/profile/update/email", updateEmail).Methods("POST")
 	r.HandleFunc("/profile/update/picture", updatePicture).Methods("POST")
+	r.HandleFunc("/profile/update/profile", updateProfile).Methods("POST")
 	r.HandleFunc("/profile/update/username", updateUsername).Methods("POST")
 	r.HandleFunc("/profile/validate/resend", resendEmail).Methods("GET")
 	r.HandleFunc("/profile/permission", profileAccessPermission).Methods("GET")

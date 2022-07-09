@@ -29,6 +29,7 @@ type ProfileData struct {
 	Address1     *string    `json:"address" gorm:"type:varchar(128)"`
 	Profession   *string    `json:"profession" gorm:"type:varchar(32)"`
 	Institution  *string    `json:"institution" gorm:"type:varchar(64)"`
+	PhoneCode    *string    `json:"phoneCode" gorm:"type:varchar(5)"`
 	PhoneNo      *string    `json:"phoneNo" gorm:"type:varchar(20)"`
 	IsWhatsapp   bool       `json:"isWhatsapp" gorm:"not null"`
 	Images       string     `json:"images" gorm:"not null;type:varchar(128)"`

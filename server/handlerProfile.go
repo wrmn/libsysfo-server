@@ -235,6 +235,7 @@ func profileInformation(w http.ResponseWriter, r *http.Request) {
 				Address:      data.ProfileData.Address1,
 				Institution:  data.ProfileData.Institution,
 				Profession:   data.ProfileData.Profession,
+				PhoneCode:    data.ProfileData.PhoneCode,
 				PhoneNo:      data.ProfileData.PhoneNo,
 				IsWhatsapp:   data.ProfileData.IsWhatsapp,
 				Images:       data.ProfileData.Images,
@@ -472,6 +473,7 @@ func updateUsername(w http.ResponseWriter, r *http.Request) {
 
 func updatePicture(w http.ResponseWriter, r *http.Request) {
 	var e profilePictureUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
 	tokenData, err := authVerification(r)
 
 	if err != nil {
@@ -492,9 +494,14 @@ func updatePicture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&e)
 	if err != nil {
-		badRequest(w, err.Error())
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
 		return
 	}
 
@@ -516,7 +523,6 @@ func updatePicture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userData.Images = upr.URL
-	fmt.Println(upr.URL)
 
 	err = database.DB.Save(&userData).Error
 	if err != nil {
@@ -524,7 +530,74 @@ func updatePicture(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	loginHandler(w, user)
+	response{
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Picture changed",
+	}.responseFormatter(w)
+}
+
+func updateProfile(w http.ResponseWriter, r *http.Request) {
+	var e profileUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
+	tokenData, err := authVerification(r)
+
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	cred := tokenData.Claims.(*cred.TokenModel)
+	pwd, err := pwdLocator(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	user, err := findUser(cred, pwd)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	userData, err := findUserData(user.ID)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	userData.Name = e.Name
+	userData.Gender = e.Gender
+	userData.PlaceOfBirth = e.PlaceOfBirth
+	userData.DateOfBirth = e.DateOfBirth
+	userData.Address1 = e.Address
+	userData.Profession = e.Profession
+	userData.Institution = e.Institution
+	userData.PhoneCode = e.PhoneCode
+	userData.PhoneNo = e.PhoneNo
+	userData.IsWhatsapp = e.IsWhatsapp
+
+	err = database.DB.Save(&userData).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+	response{
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Profile changed",
+	}.responseFormatter(w)
 }
 
 func resendEmail(w http.ResponseWriter, r *http.Request) {
