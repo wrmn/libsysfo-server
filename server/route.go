@@ -24,18 +24,26 @@ func Serve(port string) {
 	r.HandleFunc("/db/seed/book", testSeedBook).Methods("GET")
 	r.HandleFunc("/db/seed/library", testSeedLibrary).Methods("GET")
 
+	r.HandleFunc("/feedback", newFeedback).Methods("POST")
+
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
-	r.HandleFunc("/profile/borrow", profileBorrow).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")
 	r.HandleFunc("/profile/login/google", loginGoogle).Methods("POST")
+
 	r.HandleFunc("/profile/update/password", updatePassword).Methods("POST")
 	r.HandleFunc("/profile/update/email", updateEmail).Methods("POST")
 	r.HandleFunc("/profile/update/picture", updatePicture).Methods("POST")
 	r.HandleFunc("/profile/update/profile", updateProfile).Methods("POST")
 	r.HandleFunc("/profile/update/username", updateUsername).Methods("POST")
-	r.HandleFunc("/profile/validate/resend", resendEmail).Methods("GET")
+
 	r.HandleFunc("/profile/permission", profileAccessPermission).Methods("GET")
+	r.HandleFunc("/profile/permission/read/{id}", profileReadPaper).Methods("GET")
+
 	r.HandleFunc("/profile/validate", emailValidate).Methods("GET")
+	r.HandleFunc("/profile/validate/resend", resendEmail).Methods("GET")
+
+	r.HandleFunc("/profile/borrow", profileBorrow).Methods("GET")
+	r.HandleFunc("/profile/borrow/new", borrowNewBook).Methods("POST")
 
 	r.HandleFunc("/book", allBooks).Methods("GET")
 	r.HandleFunc("/book/{slug}", singleBook).Methods("GET")

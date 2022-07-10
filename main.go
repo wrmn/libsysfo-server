@@ -13,6 +13,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	} else {
+		go database.Checker()
 		server.Serve(port)
 	}
 }

@@ -292,6 +292,7 @@ func SeedLibraryCollectionBorrow() {
 			ReturnedAt:   &returnedDate,
 			CollectionID: rand.Intn(600) + 1,
 			UserID:       rand.Intn(23) + 8,
+			Status:       "finished",
 		})
 	}
 	DB.Create(&data)
@@ -311,7 +312,7 @@ func SeedLibraryPaper() {
 				Issn:        "8888888888888888",
 				Description: datatypes.JSON(`{"foo": "abstract", "bar": "nice"}`),
 				Access:      (rand.Intn(2) == 0),
-				PaperUrl:    "https://drive.google.com/file/d/0B4eE3EAAsV6jaXg5SXQweDUyc28/view?resourcekey=0-QeSPnTIRa2FWntQ-9ev6wQ",
+				PaperUrl:    "https://ik.imagekit.io/libsysfo/test.pdf",
 			})
 		}
 	}
@@ -323,10 +324,11 @@ func SeedLibraryPaperPermission() {
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 60; i++ {
+		paperId := rand.Intn(60) + 1
 		data = append(data, LibraryPaperPermission{
-			PaperID:     rand.Intn(60) + 1,
+			PaperID:     paperId,
 			UserID:      rand.Intn(23) + 8,
-			RedirectUrl: "https://drive.google.com/file/d/0B4eE3EAAsV6jaXg5SXQweDUyc28/view?resourcekey=0-QeSPnTIRa2FWntQ-9ev6wQ",
+			RedirectUrl: fmt.Sprintf("/profile/permission/read/%d", paperId),
 			Purpose:     gofakeit.LoremIpsumSentence(10),
 			Accepted:    (rand.Intn(2) == 0),
 		})
@@ -340,7 +342,7 @@ func SeedLibraryPaperAccess() {
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 200; i++ {
 		data = append(data, LibraryPaperAccess{
-			CreatedAt:    datatypes.Date(utility.DateRandom("2021-01-01", "2022-07-01")),
+			CreatedAt:    utility.DateRandom("2021-01-01", "2022-07-01"),
 			PermissionID: rand.Intn(60) + 1,
 		})
 	}

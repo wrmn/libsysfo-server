@@ -168,6 +168,7 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, e := range subResult {
 			libRespBody = append(libRespBody, libraryCollectionResponse{
+				Id:           e.ID,
 				LibraryId:    e.LibraryID,
 				Name:         e.Library.Name,
 				Coordinate:   e.Library.Coordinate,

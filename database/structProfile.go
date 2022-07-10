@@ -14,14 +14,14 @@ type ProfileAccount struct {
 	Email       string      `json:"email" gorm:"type:varchar(64);unique;not null"`
 	AccountType int         `json:"accountType" gorm:"type:int;size:32"`
 	Password    string      `json:"password,omitempty" gorm:"type:char(32);not null"`
-	LastLogin   *time.Time  `json:"lastLogin" gorm:"type:timestamp"`
+	LastLogin   *time.Time  `json:"lastLogin" gorm:"type:timestamp with time zone"`
 	ProfileData ProfileData `json:"profileData" gorm:"foreignKey:UserID"`
 }
 
 // account information
 type ProfileData struct {
 	UserID       int        `json:"userId" gorm:"type:int;size:32;primaryKey;autoIncrement:false"`
-	VerifiedAt   *time.Time `json:"verifiedAt" gorm:"type:timestamp"`
+	VerifiedAt   *time.Time `json:"verifiedAt" gorm:"type:timestamp with time zone"`
 	Name         string     `json:"name" gorm:"type:varchar(32);not null"`
 	Gender       *string    `json:"gender" gorm:"type:char(1)"`
 	PlaceOfBirth *string    `json:"placeOfBirth" gorm:"type:varchar(32)"`
@@ -33,4 +33,11 @@ type ProfileData struct {
 	PhoneNo      *string    `json:"phoneNo" gorm:"type:varchar(20)"`
 	IsWhatsapp   bool       `json:"isWhatsapp" gorm:"not null"`
 	Images       string     `json:"images" gorm:"not null;type:varchar(128)"`
+}
+
+type ProfileFeedback struct {
+	gorm.Model
+	Name    string  `json:"name" gorm:"type:varchar(32);not null"`
+	Email   *string `json:"email" gorm:"type:varchar(64)"`
+	Message string  `json:"message"`
 }

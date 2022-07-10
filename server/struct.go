@@ -63,6 +63,7 @@ type bookResponse struct {
 }
 
 type libraryCollectionResponse struct {
+	Id           int       `json:"id"`
 	SerialNumber string    `json:"sn"`
 	Name         string    `json:"name,omitempty"`
 	LibraryId    int       `json:"libraryId,omitempty"`
@@ -100,6 +101,7 @@ type profileResponse struct {
 
 type profilePermissionResponse struct {
 	CreatedAt    time.Time `json:"createdAt"`
+	Id           int       `json:"id"`
 	PaperUrl     string    `json:"redirectUrl,omitempty"`
 	PaperTitle   string    `json:"title"`
 	PaperSubject []string  `json:"subject"`
@@ -118,6 +120,7 @@ type profileCollectionBorrow struct {
 	Slug         string     `json:"slug"`
 	LibraryId    int        `json:"libraryId"`
 	Library      string     `json:"libraryName"`
+	Status       string     `json:"status"`
 }
 
 type profilePwdUpdateRequest struct {
@@ -136,6 +139,10 @@ type profileUsernameUpdateRequest struct {
 
 type profilePictureUpdateRequest struct {
 	Picture []byte `json:"newPicture"`
+}
+
+type newBorrowRequest struct {
+	Id int `json:"collectionId"`
 }
 
 type profileUpdateRequest struct {

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,4 +28,19 @@ func InitDatabase() (err error) {
 		Conn: db,
 	}), &gorm.Config{})
 	return
+}
+
+func Checker() {
+	for {
+		time.Sleep(60 * time.Minute)
+		data := []LibraryCollectionBorrow{}
+		DB.Find(&data)
+		for _, d := range data {
+			diff := time.Since(d.CreatedAt)
+			if diff.Hours() >= 48 && d.Status == "requested" {
+				d.Status = "finished"
+				DB.Save(&d)
+			}
+		}
+	}
 }
