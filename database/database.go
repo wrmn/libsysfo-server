@@ -33,12 +33,22 @@ func InitDatabase() (err error) {
 func Checker() {
 	for {
 		time.Sleep(60 * time.Minute)
-		data := []LibraryCollectionBorrow{}
-		DB.Find(&data)
-		for _, d := range data {
+		dataBorrow := []LibraryCollectionBorrow{}
+		DB.Find(&dataBorrow)
+		for _, d := range dataBorrow {
 			diff := time.Since(d.CreatedAt)
 			if diff.Hours() >= 48 && d.Status == "requested" {
-				d.Status = "finished"
+				d.Status = "canceled"
+				DB.Save(&d)
+			}
+		}
+		dataAccess := []LibraryPaperPermission{}
+		DB.Find(&dataAccess)
+		stats := false
+		for _, d := range dataAccess {
+			diff := time.Since(d.CreatedAt)
+			if diff.Hours() <= 48 && d.Accepted == nil {
+				d.Accepted = &stats
 				DB.Save(&d)
 			}
 		}

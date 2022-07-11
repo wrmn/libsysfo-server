@@ -86,6 +86,11 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		unauthorizedRequest(w, err)
 		return
 	}
+	stats, err := userStats(user.ID)
+	if err != nil || !stats {
+		badRequest(w, "Please verify your email address and fill all profile information")
+		return
+	}
 	collectionData := database.LibraryCollection{}
 
 	statsCollection := database.DB.

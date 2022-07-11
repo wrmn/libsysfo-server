@@ -192,3 +192,39 @@ func findUserData(id int) (user database.ProfileData, err error) {
 	}
 	return
 }
+
+func userStats(id int) (stats bool, err error) {
+	res, err := findUserData(id)
+	if res.Address1 == nil ||
+		res.DateOfBirth == nil ||
+		res.Gender == nil ||
+		res.Institution == nil ||
+		res.PhoneCode == nil ||
+		res.PlaceOfBirth == nil ||
+		res.Profession == nil ||
+		res.VerifiedAt == nil {
+		stats = false
+		return
+	}
+	return true, err
+}
+
+func handleNotFound() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response{
+			Status:      http.StatusNotFound,
+			Reason:      "Not Found",
+			Description: "Request not found",
+		}.responseFormatter(w)
+	})
+}
+
+func handleNotAllowed() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response{
+			Status:      http.StatusMethodNotAllowed,
+			Reason:      "Method Not Allowed",
+			Description: "Request not allowed with this method",
+		}.responseFormatter(w)
+	})
+}

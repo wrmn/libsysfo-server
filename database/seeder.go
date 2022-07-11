@@ -302,6 +302,7 @@ func SeedLibraryPaper() {
 	var data []LibraryPaper
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
+	docType := []string{"journal", "thesis", "other document"}
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 10; j++ {
 			data = append(data, LibraryPaper{
@@ -309,7 +310,7 @@ func SeedLibraryPaper() {
 				Title:       gofakeit.LoremIpsumSentence(5),
 				Subject:     pq.StringArray{gofakeit.LoremIpsumWord(), gofakeit.LoremIpsumWord()},
 				Abstract:    gofakeit.LoremIpsumParagraph(3, 3, 10, " "),
-				Issn:        "8888888888888888",
+				Type:        docType[rand.Intn(3)],
 				Description: datatypes.JSON(`{"foo": "abstract", "bar": "nice"}`),
 				Access:      (rand.Intn(2) == 0),
 				PaperUrl:    "https://ik.imagekit.io/libsysfo/test.pdf",
@@ -324,13 +325,13 @@ func SeedLibraryPaperPermission() {
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 60; i++ {
+		acc := (rand.Intn(2) == 0)
 		paperId := rand.Intn(60) + 1
 		data = append(data, LibraryPaperPermission{
-			PaperID:     paperId,
-			UserID:      rand.Intn(23) + 8,
-			RedirectUrl: fmt.Sprintf("/profile/permission/read/%d", paperId),
-			Purpose:     gofakeit.LoremIpsumSentence(10),
-			Accepted:    (rand.Intn(2) == 0),
+			PaperID:  paperId,
+			UserID:   rand.Intn(23) + 8,
+			Purpose:  gofakeit.LoremIpsumSentence(10),
+			Accepted: &acc,
 		})
 	}
 	DB.Create(&data)

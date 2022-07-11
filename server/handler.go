@@ -10,7 +10,7 @@ import (
 )
 
 func newFeedback(w http.ResponseWriter, r *http.Request) {
-	var e database.ProfileFeedback
+	var e database.Feedback
 	var unmarshalErr *json.UnmarshalTypeError
 
 	decoder := json.NewDecoder(r.Body)

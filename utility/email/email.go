@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"libsysfo-server/database"
 	"net/http"
 	"os"
 	"time"
@@ -48,5 +49,13 @@ func (content Content) SendEmail(receiver ToData) (err error) {
 	defer response.Body.Close()
 	fmt.Printf("Code: %d\n", response.StatusCode)
 	fmt.Printf("Body: %s\n", body)
+
+	database.DB.Save(&database.ThirdPartyJobs{
+		Job:          "Send Email with send in blue",
+		Destination:  receiver.Email,
+		ResponseBody: string(body),
+		Status:       response.StatusCode,
+	})
+
 	return nil
 }

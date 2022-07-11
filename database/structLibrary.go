@@ -55,7 +55,7 @@ type LibraryPaper struct {
 	Title       string                   `json:"title" gorm:"type:varchar(128)"`
 	Subject     pq.StringArray           `json:"subject" gorm:"type:varchar(16)[]"`
 	Abstract    string                   `json:"abstract"`
-	Issn        string                   `json:"issn" gorm:"type:varchar(16)"`
+	Type        string                   `json:"type" gorm:"type:varchar(16)"`
 	Description datatypes.JSON           `json:"description"`
 	Access      bool                     `json:"access"`
 	PaperUrl    string                   `gorm:"type:varchar(128)"`
@@ -64,14 +64,13 @@ type LibraryPaper struct {
 
 type LibraryPaperPermission struct {
 	gorm.Model
-	ID          int            `gorm:"type:int;primaryKey;size:32"`
-	PaperID     int            `gorm:"type:int;size:32;autoIncrement:false"`
-	Paper       LibraryPaper   `json:"paper" gorm:"foreignKey:PaperID"`
-	UserID      int            `gorm:"type:int;size:32;autoIncrement:false"`
-	User        ProfileAccount `json:"user" gorm:"foreignKey:UserID"`
-	RedirectUrl string         `json:"redirectUrl" gorm:"type:varchar(128)"`
-	Purpose     string         `json:"purpose" gorm:"type:varchar(128)"`
-	Accepted    bool           `json:"access"`
+	ID       int            `gorm:"type:int;primaryKey;size:32"`
+	PaperID  int            `gorm:"type:int;size:32;autoIncrement:false"`
+	Paper    LibraryPaper   `json:"paper" gorm:"foreignKey:PaperID"`
+	UserID   int            `gorm:"type:int;size:32;autoIncrement:false"`
+	User     ProfileAccount `json:"user" gorm:"foreignKey:UserID"`
+	Purpose  string         `json:"purpose" gorm:"type:varchar(128)"`
+	Accepted *bool          `json:"access"`
 }
 
 type LibraryPaperAccess struct {

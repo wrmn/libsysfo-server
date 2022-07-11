@@ -34,10 +34,3 @@ type ProfileData struct {
 	IsWhatsapp   bool       `json:"isWhatsapp" gorm:"not null"`
 	Images       string     `json:"images" gorm:"not null;type:varchar(128)"`
 }
-
-type ProfileFeedback struct {
-	gorm.Model
-	Name    string  `json:"name" gorm:"type:varchar(32);not null"`
-	Email   *string `json:"email" gorm:"type:varchar(64)"`
-	Message string  `json:"message"`
-}

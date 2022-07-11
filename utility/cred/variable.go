@@ -13,6 +13,14 @@ type FormAuth struct {
 	Password  string `json:"password"`
 }
 
+type RegisForm struct {
+	Username       *string `json:"username"`
+	Name           string  `json:"name"`
+	Email          string  `json:"email"`
+	Password       string  `json:"password"`
+	RetypePassword string  `json:"retypePassword"`
+}
+
 type GoogleAuthClaims struct {
 	jwt.RegisteredClaims
 	Email         string `json:"email"`

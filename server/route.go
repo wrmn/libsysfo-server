@@ -29,6 +29,7 @@ func Serve(port string) {
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")
 	r.HandleFunc("/profile/login/google", loginGoogle).Methods("POST")
+	r.HandleFunc("/profile/register", registerForm).Methods("POST")
 
 	r.HandleFunc("/profile/update/password", updatePassword).Methods("POST")
 	r.HandleFunc("/profile/update/email", updateEmail).Methods("POST")
@@ -37,6 +38,7 @@ func Serve(port string) {
 	r.HandleFunc("/profile/update/username", updateUsername).Methods("POST")
 
 	r.HandleFunc("/profile/permission", profileAccessPermission).Methods("GET")
+	r.HandleFunc("/profile/permission/new", profileNewPermission).Methods("POST")
 	r.HandleFunc("/profile/permission/read/{id}", profileReadPaper).Methods("GET")
 
 	r.HandleFunc("/profile/validate", emailValidate).Methods("GET")
@@ -53,6 +55,9 @@ func Serve(port string) {
 
 	r.HandleFunc("/paper", allPapers).Methods("GET")
 	r.HandleFunc("/paper/{id}", singlePaper).Methods("GET")
+
+	r.MethodNotAllowedHandler = handleNotAllowed()
+	r.NotFoundHandler = handleNotFound()
 
 	http.Handle("/", r)
 	utility.InfoPrint(1, fmt.Sprintf("service at port %s", port))

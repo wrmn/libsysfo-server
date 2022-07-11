@@ -77,7 +77,7 @@ type paperResponse struct {
 	Title       string         `json:"title"`
 	Subject     pq.StringArray `json:"subject"`
 	Abstract    string         `json:"abstract,omitempty"`
-	Issn        string         `json:"issn"`
+	Type        string         `json:"type"`
 	Description datatypes.JSON `json:"description"`
 	Access      bool           `json:"access"`
 }
@@ -102,13 +102,12 @@ type profileResponse struct {
 type profilePermissionResponse struct {
 	CreatedAt    time.Time `json:"createdAt"`
 	Id           int       `json:"id"`
-	PaperUrl     string    `json:"redirectUrl,omitempty"`
 	PaperTitle   string    `json:"title"`
 	PaperSubject []string  `json:"subject"`
-	PaperIssn    string    `json:"issn"`
+	PaperType    string    `json:"type"`
 	Library      string    `json:"libraryName"`
 	Purpose      string    `json:"purpose"`
-	Accepted     bool      `json:"accepted"`
+	Accepted     *bool     `json:"accepted"`
 }
 
 type profileCollectionBorrow struct {
@@ -143,6 +142,11 @@ type profilePictureUpdateRequest struct {
 
 type newBorrowRequest struct {
 	Id int `json:"collectionId"`
+}
+
+type newPermissionRequest struct {
+	Id      int    `json:"paperId"`
+	Purpose string `json:"requestPurpose"`
 }
 
 type profileUpdateRequest struct {

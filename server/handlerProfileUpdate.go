@@ -92,7 +92,7 @@ func updateEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Email = e.Email
+	user.Email = strings.ToLower(e.Email)
 	err = database.DB.Save(&user).Error
 	if err != nil {
 		badRequest(w, "email has been used")
@@ -136,7 +136,8 @@ func updateUsername(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Username = e.Username
+	newUsername := strings.ToLower(*e.Username)
+	user.Username = &newUsername
 	err = database.DB.Save(&user).Error
 	if err != nil {
 		badRequest(w, "username has been used")

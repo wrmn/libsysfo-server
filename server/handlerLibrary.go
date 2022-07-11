@@ -101,7 +101,7 @@ func singleLibrary(w http.ResponseWriter, r *http.Request) {
 			Title:       c.Title,
 			Subject:     c.Subject,
 			Abstract:    c.Abstract,
-			Issn:        c.Issn,
+			Type:        c.Type,
 			Description: c.Description,
 			Access:      c.Access,
 		})
@@ -145,7 +145,7 @@ func allPapers(w http.ResponseWriter, r *http.Request) {
 			Id:          e.ID,
 			Title:       e.Title,
 			Subject:     e.Subject,
-			Issn:        e.Issn,
+			Type:        e.Type,
 			Description: e.Description,
 			Access:      e.Access,
 		})
@@ -193,7 +193,7 @@ func singlePaper(w http.ResponseWriter, r *http.Request) {
 				Title:       result.Title,
 				Subject:     result.Subject,
 				Abstract:    result.Abstract,
-				Issn:        result.Issn,
+				Type:        result.Type,
 				Description: result.Description,
 				Access:      result.Access,
 			},

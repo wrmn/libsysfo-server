@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"libsysfo-server/database"
@@ -88,14 +89,88 @@ func searchPermission(id int) (respBody []profilePermissionResponse) {
 		respBody = append(respBody, profilePermissionResponse{
 			CreatedAt:    d.CreatedAt,
 			Id:           d.ID,
-			PaperUrl:     d.RedirectUrl,
 			PaperTitle:   d.Paper.Title,
 			PaperSubject: d.Paper.Subject,
-			PaperIssn:    d.Paper.Issn,
+			PaperType:    d.Paper.Type,
 			Library:      d.Paper.Library.Name,
 			Purpose:      d.Purpose,
 			Accepted:     d.Accepted,
 		})
 	}
 	return
+}
+
+func profileNewPermission(w http.ResponseWriter, r *http.Request) {
+	var e newPermissionRequest
+	var unmarshalErr *json.UnmarshalTypeError
+	tokenData, err := authVerification(r)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+	cred := tokenData.Claims.(*cred.TokenModel)
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	user, err := getUser(cred)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
+
+	stats, err := userStats(user.ID)
+	if err != nil || !stats {
+		badRequest(w, "Please verify your email address and fill all profile information")
+		return
+	}
+
+	statsPaper := database.DB.
+		Where("id = ? AND access = true", e.Id).
+		Find(&database.LibraryPaper{}).RowsAffected
+
+	if statsPaper == 0 {
+		badRequest(w, "Dokumen tidak mengizinkan akses")
+		return
+	}
+
+	statsPermission := database.DB.
+		Where("paper_id = ? AND user_id = ?", e.Id, user.ID).
+		Find(&database.LibraryPaperPermission{}).RowsAffected
+
+	if statsPermission != 0 {
+		response{
+			Status:      http.StatusOK,
+			Reason:      "Ok",
+			Description: "Paper access has been requested before",
+		}.responseFormatter(w)
+		return
+	}
+
+	permission := database.LibraryPaperPermission{
+		PaperID: e.Id,
+		UserID:  user.ID,
+		Purpose: e.Purpose,
+	}
+
+	err = database.DB.Save(&permission).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	response{
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Paper access requested",
+	}.responseFormatter(w)
 }

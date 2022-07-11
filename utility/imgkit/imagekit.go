@@ -3,6 +3,7 @@ package imgkit
 import (
 	"context"
 	"fmt"
+	"libsysfo-server/database"
 	"os"
 	"time"
 
@@ -35,6 +36,12 @@ func (data ImgInformation) UploadImage() (upr *imagekit.UploadResponse, err erro
 	ctx := context.Background()
 
 	upr, err = ik.Upload.ServerUpload(ctx, &ur)
+	database.DB.Save(&database.ThirdPartyJobs{
+		Job:          "upload Image",
+		Destination:  "ImageKit",
+		ResponseBody: upr.URL,
+		Status:       200,
+	})
 	return
 }
 
