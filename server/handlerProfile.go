@@ -53,30 +53,10 @@ func loginGoogle(w http.ResponseWriter, r *http.Request) {
 		loginHandler(w, user)
 	}
 }
-
 func loginForm(w http.ResponseWriter, r *http.Request) {
-	var e cred.FormAuth
-	var unmarshalErr *json.UnmarshalTypeError
-
-	decoder := json.NewDecoder(r.Body)
-
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&e)
+	user, err := getLoginData(r)
 	if err != nil {
-		if errors.As(err, &unmarshalErr) {
-			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
-		} else {
-			badRequest(w, err.Error())
-		}
-		return
-	}
-	e.Password = fmt.Sprintf("%x", md5.Sum([]byte(e.Password)))
-
-	user := database.ProfileAccount{}
-	result := database.DB.Where("email = ? AND password = ?", e.Indicator, e.Password).Or("username = ? AND password = ?", e.Indicator, e.Password).Find(&user)
-	if result.RowsAffected == 0 {
-		err := errors.New("invalid username or password")
-		unauthorizedRequest(w, err)
+		badRequest(w, err.Error())
 		return
 	} else if user.AccountType != 3 {
 		err := errors.New("user not allowed")
@@ -137,7 +117,7 @@ func registerForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//NOTE: change to deployed url server
-	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult)
+	link := fmt.Sprintf("https://young-castle-31877.herokuapp.com/profile/validate?token=%s", tokenResult)
 	fmt.Println(link)
 
 	content := fmt.Sprintf("<html><head></head><body><p>Hello,</p>segera menuju <a href='%s'>link</a> ini untuk verifikasi akun anda</body>	</html>",
@@ -260,7 +240,7 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 		return
 	}
 	//NOTE: change to deployed url server
-	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult)
+	link := fmt.Sprintf("https://young-castle-31877.herokuapp.com/profile/validate?token=%s", tokenResult)
 	fmt.Println(link)
 
 	content := fmt.Sprintf("<html><head></head><body><p>Hello,</p><p>Password Sementara anda adalah %s</p>segera menuju <a href='%s'>link</a> ini untuk verifikasi akun anda</body>	</html>",

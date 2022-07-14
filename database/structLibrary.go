@@ -11,7 +11,6 @@ import (
 type LibraryData struct {
 	ID            int             `json:"id" gorm:"type:int;size:32;primaryKey"`
 	UserID        int             `json:"userId" gorm:"type:int;size:32;autoIncrement:false"`
-	User          ProfileAccount  `json:"user" gorm:"foreignKey:UserID"`
 	Name          string          `json:"name" gorm:"type:varchar(64);not null"`
 	Address       string          `json:"address" gorm:"type:varchar(128);not null"`
 	Coordinate    pq.Float64Array `json:"coordinate" gorm:"type:decimal[]"`
@@ -78,4 +77,11 @@ type LibraryPaperAccess struct {
 	CreatedAt    time.Time              `json:"createdAt" gorm:"type:timestamp with time zone"`
 	PermissionID int                    `gorm:"type:int;size:32;autoIncrement:false"`
 	Permission   LibraryPaperPermission `json:"paper" gorm:"foreignKey:PermissionID"`
+}
+
+type LibraryVisit struct {
+	gorm.Model
+	UserID  int            `gorm:"type:int;size:32;autoIncrement:false"`
+	User    ProfileAccount `json:"user" gorm:"foreignKey:UserID"`
+	Purpose string         `json:"purpose" gorm:"type:varchar(128)"`
 }

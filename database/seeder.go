@@ -16,6 +16,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 func SeedProfileAccount() {
@@ -293,6 +294,24 @@ func SeedLibraryCollectionBorrow() {
 			CollectionID: rand.Intn(600) + 1,
 			UserID:       rand.Intn(23) + 8,
 			Status:       "finished",
+		})
+	}
+	DB.Create(&data)
+}
+
+func SeedLibraryVisit() {
+	var data []LibraryVisit
+	currentTime := time.Now()
+	rand.Seed(currentTime.UnixNano())
+
+	for i := 0; i < 200; i++ {
+		randDate := utility.DateRandom("2021-01-01", "2022-07-01")
+		data = append(data, LibraryVisit{
+			Model: gorm.Model{
+				CreatedAt: randDate,
+			},
+			UserID:  rand.Intn(23) + 8,
+			Purpose: gofakeit.LoremIpsumSentence(4),
 		})
 	}
 	DB.Create(&data)

@@ -16,6 +16,7 @@ type ProfileAccount struct {
 	Password    string      `json:"password,omitempty" gorm:"type:char(32);not null"`
 	LastLogin   *time.Time  `json:"lastLogin" gorm:"type:timestamp with time zone"`
 	ProfileData ProfileData `json:"profileData" gorm:"foreignKey:UserID"`
+	Library     LibraryData `json:"libraryData,omitempty" gorm:"foreignKey:UserID"`
 }
 
 // account information

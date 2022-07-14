@@ -26,6 +26,9 @@ func Serve(port string) {
 
 	r.HandleFunc("/feedback", newFeedback).Methods("POST")
 
+	r.HandleFunc("/admin/library", adminInformation).Methods("GET")
+	r.HandleFunc("/admin/library/login", adminLogin).Methods("POST")
+
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")
 	r.HandleFunc("/profile/login/google", loginGoogle).Methods("POST")

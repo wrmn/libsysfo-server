@@ -140,7 +140,7 @@ func paperFilter(r *http.Request) func(db *gorm.DB) *gorm.DB {
 
 func (data paginate) generate(r *http.Request, page int) (result paginate) {
 	// NOTE:change to https when deployed
-	link := "http://" + r.Host + r.URL.Path + "?page="
+	link := "https://" + r.Host + r.URL.Path + "?page="
 	if page > 1 {
 		result.Prev = link + strconv.Itoa(page-1)
 	}
@@ -227,4 +227,30 @@ func handleNotAllowed() http.Handler {
 			Description: "Request not allowed with this method",
 		}.responseFormatter(w)
 	})
+}
+
+func getLoginData(r *http.Request) (user database.ProfileAccount, err error) {
+	var e cred.FormAuth
+	var unmarshalErr *json.UnmarshalTypeError
+
+	decoder := json.NewDecoder(r.Body)
+
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			err = errors.New("Wrong Type provided for field " + unmarshalErr.Field)
+		}
+		return
+	}
+
+	e.Password = fmt.Sprintf("%x", md5.Sum([]byte(e.Password)))
+
+	user = database.ProfileAccount{}
+	result := database.DB.Where("email = ? AND password = ?", e.Indicator, e.Password).Or("username = ? AND password = ?", e.Indicator, e.Password).Find(&user).RowsAffected
+	if result == 0 {
+		err = errors.New("invalid username or password ")
+	}
+
+	return
 }

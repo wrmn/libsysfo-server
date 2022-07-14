@@ -72,6 +72,14 @@ type libraryCollectionResponse struct {
 	Status       int       `json:"status"`
 }
 
+type adminInformationResponse struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Library  string `json:"libraryName"`
+	Image    string `json:"libraryImage"`
+	Address  string `json:"libraryAddress"`
+}
+
 type paperResponse struct {
 	Id          int            `json:"id"`
 	Title       string         `json:"title"`

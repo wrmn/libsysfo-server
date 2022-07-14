@@ -10,16 +10,17 @@ func testMigrate(w http.ResponseWriter, r *http.Request) {
 	err := database.DB.AutoMigrate(
 		&database.Book{},
 		&database.BookDetail{},
+		&database.ProfileAccount{},
+		&database.ProfileData{},
 		&database.LibraryData{},
 		&database.LibraryCollection{},
 		&database.LibraryCollectionBorrow{},
 		&database.LibraryPaper{},
 		&database.LibraryPaperPermission{},
 		&database.LibraryPaperAccess{},
-		&database.ProfileAccount{},
-		&database.ProfileData{},
 		&database.Feedback{},
 		&database.ThirdPartyJobs{},
+		&database.LibraryVisit{},
 	)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -51,4 +52,5 @@ func testSeedLibrary(w http.ResponseWriter, r *http.Request) {
 	database.SeedLibraryPaper()
 	database.SeedLibraryPaperPermission()
 	database.SeedLibraryPaperAccess()
+	database.SeedLibraryVisit()
 }
