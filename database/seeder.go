@@ -143,7 +143,6 @@ func SeedBookDetail() {
 		link := fmt.Sprintf("%s/api/books/%s/detail", os.Getenv("BOOK_SERVER_URL"), dataBook.Slug)
 		req, err := http.NewRequest("GET", link, nil)
 		if err != nil {
-			fmt.Println(link)
 			log.Fatal("error nih")
 			return
 		}
@@ -282,18 +281,26 @@ func SeedLibraryCollectionBorrow() {
 	var data []LibraryCollectionBorrow
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
+	status := []string{"requested", "taked", "finished", "canceled"}
 
-	for i := 0; i < 200; i++ {
-		randDate := utility.DateRandom("2021-01-01", "2022-07-01")
-		takedDate := randDate.Add(24 * time.Hour)
-		returnedDate := randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)
+	for i := 0; i < 1000; i++ {
+		statint := rand.Intn(4)
+		randDate := utility.DateRandom("2022-01-01", "2022-07-01")
+		var takedDate time.Time
+		var returnedDate time.Time
+		if statint == 2 || statint == 1 {
+			takedDate = randDate.Add(24 * time.Hour)
+		}
+		if statint == 2 {
+			returnedDate = randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)
+		}
 		data = append(data, LibraryCollectionBorrow{
 			CreatedAt:    randDate,
 			TakedAt:      &takedDate,
 			ReturnedAt:   &returnedDate,
 			CollectionID: rand.Intn(600) + 1,
 			UserID:       rand.Intn(23) + 8,
-			Status:       "finished",
+			Status:       status[statint],
 		})
 	}
 	DB.Create(&data)
@@ -305,7 +312,7 @@ func SeedLibraryVisit() {
 	rand.Seed(currentTime.UnixNano())
 
 	for i := 0; i < 200; i++ {
-		randDate := utility.DateRandom("2021-01-01", "2022-07-01")
+		randDate := utility.DateRandom("2022-01-01", "2022-07-01")
 		data = append(data, LibraryVisit{
 			Model: gorm.Model{
 				CreatedAt: randDate,
@@ -343,7 +350,7 @@ func SeedLibraryPaperPermission() {
 	var data []LibraryPaperPermission
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
-	for i := 0; i < 60; i++ {
+	for i := 0; i < 200; i++ {
 		acc := (rand.Intn(2) == 0)
 		paperId := rand.Intn(60) + 1
 		data = append(data, LibraryPaperPermission{
@@ -360,9 +367,9 @@ func SeedLibraryPaperAccess() {
 	var data []LibraryPaperAccess
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 1000; i++ {
 		data = append(data, LibraryPaperAccess{
-			CreatedAt:    utility.DateRandom("2021-01-01", "2022-07-01"),
+			CreatedAt:    utility.DateRandom("2022-01-01", "2022-07-01"),
 			PermissionID: rand.Intn(60) + 1,
 		})
 	}

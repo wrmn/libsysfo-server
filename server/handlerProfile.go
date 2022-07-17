@@ -117,8 +117,7 @@ func registerForm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//NOTE: change to deployed url server
-	link := fmt.Sprintf("https://young-castle-31877.herokuapp.com/profile/validate?token=%s", tokenResult)
-	fmt.Println(link)
+	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult)
 
 	content := fmt.Sprintf("<html><head></head><body><p>Hello,</p>segera menuju <a href='%s'>link</a> ini untuk verifikasi akun anda</body>	</html>",
 		link,
@@ -240,8 +239,7 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 		return
 	}
 	//NOTE: change to deployed url server
-	link := fmt.Sprintf("https://young-castle-31877.herokuapp.com/profile/validate?token=%s", tokenResult)
-	fmt.Println(link)
+	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult)
 
 	content := fmt.Sprintf("<html><head></head><body><p>Hello,</p><p>Password Sementara anda adalah %s</p>segera menuju <a href='%s'>link</a> ini untuk verifikasi akun anda</body>	</html>",
 		password,

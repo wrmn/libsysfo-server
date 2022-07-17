@@ -140,7 +140,7 @@ func paperFilter(r *http.Request) func(db *gorm.DB) *gorm.DB {
 
 func (data paginate) generate(r *http.Request, page int) (result paginate) {
 	// NOTE:change to https when deployed
-	link := "https://" + r.Host + r.URL.Path + "?page="
+	link := "http://" + r.Host + r.URL.Path + "?page="
 	if page > 1 {
 		result.Prev = link + strconv.Itoa(page-1)
 	}
@@ -252,5 +252,59 @@ func getLoginData(r *http.Request) (user database.ProfileAccount, err error) {
 		err = errors.New("invalid username or password ")
 	}
 
+	return
+}
+
+func getLibraryBook(libId int) (bookData []bookResponse, err error) {
+	bookQuery := []database.LibraryCollection{}
+	err = database.DB.Where("library_id = ?", libId).Preload("Book", func(db *gorm.DB) *gorm.DB {
+		return database.DB.Preload("BookDetail")
+	}).Find(&bookQuery).Error
+
+	if err != nil {
+		return
+	}
+
+	for _, d := range bookQuery {
+		bookData = append(bookData, bookResponse{
+			Title:       d.Book.Title,
+			Image:       d.Book.Image,
+			Author:      d.Book.Author,
+			Slug:        d.Book.Slug,
+			ReleaseDate: d.Book.BookDetail.ReleaseDate,
+			Language:    d.Book.BookDetail.Language,
+			Description: d.Book.BookDetail.Description,
+			Country:     d.Book.BookDetail.Country,
+			Publisher:   d.Book.BookDetail.Publisher,
+			PageCount:   d.Book.BookDetail.PageCount,
+			Category:    d.Book.BookDetail.Category,
+			Status: &libraryCollectionResponse{
+				Availability: d.Availability,
+				Status:       d.Status,
+			},
+		})
+	}
+
+	return
+}
+
+func getLibraryPaper(libId int) (paperData []paperResponse, err error) {
+	paperQuery := []database.LibraryPaper{}
+	err = database.DB.Where("library_id = ?", libId).Find(&paperQuery).Error
+	if err != nil {
+		return
+	}
+
+	for _, c := range paperQuery {
+		paperData = append(paperData, paperResponse{
+			Id:          c.ID,
+			Title:       c.Title,
+			Subject:     c.Subject,
+			Abstract:    c.Abstract,
+			Type:        c.Type,
+			Description: c.Description,
+			Access:      c.Access,
+		})
+	}
 	return
 }

@@ -28,6 +28,8 @@ func Serve(port string) {
 
 	r.HandleFunc("/admin/library", adminInformation).Methods("GET")
 	r.HandleFunc("/admin/library/login", adminLogin).Methods("POST")
+	r.HandleFunc("/admin/library/dashboard", libraryDashboard).Methods("GET")
+	// r.HandleFunc("/admin/library/books", libraryBooks).Methods("GET")
 
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")

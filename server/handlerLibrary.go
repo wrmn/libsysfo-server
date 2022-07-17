@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
 func allLibraries(w http.ResponseWriter, r *http.Request) {
@@ -55,56 +54,16 @@ func singleLibrary(w http.ResponseWriter, r *http.Request) {
 		database.DB.Where("library_id=?", result.ID).Find(&book).RowsAffected,
 		database.DB.Where("library_id=?", result.ID).Find(&paper).RowsAffected
 
-	bookData := []bookResponse{}
-	paperData := []paperResponse{}
-	bookQuery := []database.LibraryCollection{}
-	paperQuery := []database.LibraryPaper{}
-
-	err = database.DB.Where("library_id = ?", reqId).Preload("Book", func(db *gorm.DB) *gorm.DB {
-		return database.DB.Preload("BookDetail")
-	}).Find(&bookQuery).Error
-
+	bookData, err := getLibraryBook(reqId)
 	if err != nil {
 		intServerError(w, err)
 		return
 	}
 
-	for _, d := range bookQuery {
-		bookData = append(bookData, bookResponse{
-			Title:       d.Book.Title,
-			Image:       d.Book.Image,
-			Author:      d.Book.Author,
-			Slug:        d.Book.Slug,
-			ReleaseDate: d.Book.BookDetail.ReleaseDate,
-			Language:    d.Book.BookDetail.Language,
-			Description: d.Book.BookDetail.Description,
-			Country:     d.Book.BookDetail.Country,
-			Publisher:   d.Book.BookDetail.Publisher,
-			PageCount:   d.Book.BookDetail.PageCount,
-			Category:    d.Book.BookDetail.Category,
-			Status: &libraryCollectionResponse{
-				Availability: d.Availability,
-				Status:       d.Status,
-			},
-		})
-	}
-
-	err = database.DB.Where("library_id = ?", reqId).Find(&paperQuery).Error
+	paperData, err := getLibraryPaper(reqId)
 	if err != nil {
 		intServerError(w, err)
 		return
-	}
-
-	for _, c := range paperQuery {
-		paperData = append(paperData, paperResponse{
-			Id:          c.ID,
-			Title:       c.Title,
-			Subject:     c.Subject,
-			Abstract:    c.Abstract,
-			Type:        c.Type,
-			Description: c.Description,
-			Access:      c.Access,
-		})
 	}
 
 	response{

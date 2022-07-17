@@ -25,7 +25,6 @@ func newFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	database.DB.Save(&e)
-	fmt.Println(*e.Email)
 	if *e.Email != "" {
 		content := fmt.Sprintf("<html><head></head><body><p>Hello %s,</p>Terima kasih untuk feedback anda untuk aplikasi libsysfo</body>	</html>",
 			e.Name,

@@ -285,8 +285,8 @@ func resendEmail(w http.ResponseWriter, r *http.Request) {
 
 	tokenResult := strings.Split(r.Header.Values("Authorization")[0], " ")
 	//NOTE: change to deployed url server
-	link := fmt.Sprintf("https://young-castle-31877.herokuapp.com/profile/validate?token=%s", tokenResult[1])
-	fmt.Println(link)
+	link := fmt.Sprintf("http://localhost:5000/profile/validate?token=%s", tokenResult[1])
+
 	content := fmt.Sprintf("<html><head></head><body><p>Hello,</p>Segera menuju <a href='%s'>link</a> ini untuk verifikasi akun anda</body>	</html>",
 		link,
 	)

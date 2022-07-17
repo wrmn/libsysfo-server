@@ -22,6 +22,7 @@ type responseBody struct {
 	Paper      interface{} `json:"paper,omitempty"`
 	Borrow     interface{} `json:"borrow,omitempty"`
 	Permission interface{} `json:"permission,omitempty"`
+	Dataset    interface{} `json:"dataset,omitempty"`
 	Token      string      `json:"token,omitempty"`
 	Paginate   *paginate   `json:"paginate,omitempty"`
 }
@@ -73,11 +74,15 @@ type libraryCollectionResponse struct {
 }
 
 type adminInformationResponse struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Library  string `json:"libraryName"`
-	Image    string `json:"libraryImage"`
-	Address  string `json:"libraryAddress"`
+	Username      string          `json:"username"`
+	Email         string          `json:"email"`
+	Library       string          `json:"libraryName"`
+	Image         string          `json:"libraryImage"`
+	Address       string          `json:"libraryAddress"`
+	Coordinate    pq.Float64Array `json:"coordinate"`
+	Description   string          `json:"description"`
+	ContentImages pq.StringArray  `json:"contentImages"`
+	Webpage       string          `json:"webpage"`
 }
 
 type paperResponse struct {
@@ -168,4 +173,52 @@ type profileUpdateRequest struct {
 	PhoneCode    *string `json:"phoneCode,omitempty"`
 	PhoneNo      *string `json:"phoneNo,omitempty"`
 	IsWhatsapp   bool    `json:"isWhatsapp,omitempty"`
+}
+
+type borrowDataset struct {
+	Month     string `json:"month"`
+	Count     int64  `json:"count"`
+	Requested int64  `json:"requested"`
+	Taked     int64  `json:"taked"`
+	Finished  int64  `json:"finished"`
+	Canceled  int64  `json:"canceled"`
+}
+
+type bookDataset struct {
+	Count int64 `json:"count"`
+	New   int64 `json:"new"`
+	Great int64 `json:"great"`
+	Good  int64 `json:"good"`
+	Bad   int64 `json:"bad"`
+}
+
+type paperDataset struct {
+	Count   int64 `json:"count"`
+	Journal int64 `json:"journal"`
+	Thesis  int64 `json:"thesis"`
+	Other   int64 `json:"other"`
+}
+
+type accessDataset struct {
+	Month string `json:"month"`
+	Count int64  `json:"count"`
+}
+
+type libraryDashboardResponse struct {
+	Borrow     []borrowDataset `json:"borrow"`
+	Access     []accessDataset `json:"access"`
+	BookStatus bookDataset     `json:"bookStatus"`
+	PaperType  paperDataset    `json:"paperType"`
+	Monthly    monthCount      `json:"monthly"`
+}
+
+type monthCount struct {
+	Borrow int64 `json:"borrow"`
+	Access int64 `json:"access"`
+}
+
+type datarange struct {
+	Id       int
+	FromDate string
+	ToDate   string
 }

@@ -3,7 +3,6 @@ package email
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"libsysfo-server/database"
 	"net/http"
@@ -47,8 +46,6 @@ func (content Content) SendEmail(receiver ToData) (err error) {
 		return
 	}
 	defer response.Body.Close()
-	fmt.Printf("Code: %d\n", response.StatusCode)
-	fmt.Printf("Body: %s\n", body)
 
 	database.DB.Save(&database.ThirdPartyJobs{
 		Job:          "Send Email with send in blue",
