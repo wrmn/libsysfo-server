@@ -103,7 +103,7 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collectionData.Availability = false
+	collectionData.Availability = 0
 
 	borrowData := database.LibraryCollectionBorrow{
 		UserID:       user.ID,

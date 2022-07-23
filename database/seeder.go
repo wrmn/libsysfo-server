@@ -16,7 +16,6 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 func SeedProfileAccount() {
@@ -178,7 +177,7 @@ func SeedBookDetail() {
 				Language:    *responseBody.Language,
 				Country:     *responseBody.Country,
 				Publisher:   *responseBody.Publisher,
-				PageCount:   *responseBody.PageCount,
+				PageCount:   int(*responseBody.PageCount),
 				Category:    *responseBody.Category,
 			})
 		}
@@ -269,7 +268,7 @@ func SeedLibraryCollection() {
 				SerialNumber: fmt.Sprintf("1234.23.12.%d", sn),
 				LibraryID:    i + 1,
 				BookID:       rand.Intn(47) + 1,
-				Availability: true,
+				Availability: 1,
 				Status:       rand.Intn(4) + 1,
 			})
 		}
@@ -285,41 +284,26 @@ func SeedLibraryCollectionBorrow() {
 
 	for i := 0; i < 1000; i++ {
 		statint := rand.Intn(4)
-		randDate := utility.DateRandom("2022-01-01", "2022-07-01")
-		var takedDate time.Time
-		var returnedDate time.Time
-		if statint == 2 || statint == 1 {
-			takedDate = randDate.Add(24 * time.Hour)
-		}
-		if statint == 2 {
-			returnedDate = randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)
-		}
-		data = append(data, LibraryCollectionBorrow{
+		randDate := utility.DateRandom("2022-01-01", "2022-07-31")
+
+		singleData := LibraryCollectionBorrow{
 			CreatedAt:    randDate,
-			TakedAt:      &takedDate,
-			ReturnedAt:   &returnedDate,
 			CollectionID: rand.Intn(600) + 1,
 			UserID:       rand.Intn(23) + 8,
 			Status:       status[statint],
-		})
-	}
-	DB.Create(&data)
-}
+		}
 
-func SeedLibraryVisit() {
-	var data []LibraryVisit
-	currentTime := time.Now()
-	rand.Seed(currentTime.UnixNano())
+		if statint == 2 || statint == 1 {
+			takedDate := randDate.Add(24 * time.Hour)
+			singleData.TakedAt = &takedDate
+		}
+		if statint == 2 {
+			returnedDate := randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)
+			singleData.ReturnedAt = &returnedDate
 
-	for i := 0; i < 200; i++ {
-		randDate := utility.DateRandom("2022-01-01", "2022-07-01")
-		data = append(data, LibraryVisit{
-			Model: gorm.Model{
-				CreatedAt: randDate,
-			},
-			UserID:  rand.Intn(23) + 8,
-			Purpose: gofakeit.LoremIpsumSentence(4),
-		})
+		}
+
+		data = append(data, singleData)
 	}
 	DB.Create(&data)
 }
@@ -369,7 +353,7 @@ func SeedLibraryPaperAccess() {
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 1000; i++ {
 		data = append(data, LibraryPaperAccess{
-			CreatedAt:    utility.DateRandom("2022-01-01", "2022-07-01"),
+			CreatedAt:    utility.DateRandom("2022-01-01", "2022-07-31"),
 			PermissionID: rand.Intn(60) + 1,
 		})
 	}

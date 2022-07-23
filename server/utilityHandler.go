@@ -8,6 +8,7 @@ import (
 	"libsysfo-server/database"
 	"libsysfo-server/utility/cred"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -162,9 +163,6 @@ func findUser(cred *cred.TokenModel, pwd string) (user database.ProfileAccount, 
 	if result.RowsAffected == 0 {
 		err = errors.New("invalid password")
 		return
-	} else if user.AccountType != 3 {
-		err = errors.New("user not allowed")
-		return
 	}
 	return
 }
@@ -210,7 +208,7 @@ func userStats(id int) (stats bool, err error) {
 }
 
 func handleNotFound() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		response{
 			Status:      http.StatusNotFound,
 			Reason:      "Not Found",
@@ -220,7 +218,7 @@ func handleNotFound() http.Handler {
 }
 
 func handleNotAllowed() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		response{
 			Status:      http.StatusMethodNotAllowed,
 			Reason:      "Method Not Allowed",
@@ -259,7 +257,7 @@ func getLibraryBook(libId int) (bookData []bookResponse, err error) {
 	bookQuery := []database.LibraryCollection{}
 	err = database.DB.Where("library_id = ?", libId).Preload("Book", func(db *gorm.DB) *gorm.DB {
 		return database.DB.Preload("BookDetail")
-	}).Find(&bookQuery).Error
+	}).Order("id desc").Find(&bookQuery).Error
 
 	if err != nil {
 		return
@@ -267,6 +265,7 @@ func getLibraryBook(libId int) (bookData []bookResponse, err error) {
 
 	for _, d := range bookQuery {
 		bookData = append(bookData, bookResponse{
+			Id:          d.ID,
 			Title:       d.Book.Title,
 			Image:       d.Book.Image,
 			Author:      d.Book.Author,
@@ -306,5 +305,43 @@ func getLibraryPaper(libId int) (paperData []paperResponse, err error) {
 			Access:      c.Access,
 		})
 	}
+	return
+}
+
+func setBookResponse(result database.Book) (bookRespBody bookResponse) {
+	bookRespBody.Title = result.Title
+	bookRespBody.Image = result.Image
+	bookRespBody.Author = result.Author
+	bookRespBody.Slug = result.Slug
+	bookRespBody.Source = result.Source
+	bookRespBody.ReleaseDate = result.BookDetail.ReleaseDate
+	bookRespBody.Description = result.BookDetail.Description
+	bookRespBody.Language = result.BookDetail.Language
+	bookRespBody.Country = result.BookDetail.Country
+	bookRespBody.PageCount = int(result.BookDetail.PageCount)
+	bookRespBody.Publisher = result.BookDetail.Publisher
+	bookRespBody.Category = result.BookDetail.Category
+	return
+}
+
+func checkExist(q *gorm.DB) (int64, error) {
+	return q.RowsAffected, q.Error
+}
+
+func slugGenerator(title string) (slug string) {
+	re := regexp.MustCompile(`[^a-zA-Z0-9]`)
+	slug = re.ReplaceAllString(strings.ToLower(title), "-")
+	var exist int64 = 1
+	rep := 0
+	for exist != 0 {
+		query := database.DB.Preload("BookDetail").
+			Where("slug = ?", slug).Find(&database.Book{})
+		exist, _ = checkExist(query)
+		if exist != 0 {
+			rep += 1
+			slug = fmt.Sprintf("%s-%d", slug, rep)
+		}
+	}
+
 	return
 }

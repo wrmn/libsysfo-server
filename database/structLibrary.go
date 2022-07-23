@@ -20,16 +20,15 @@ type LibraryData struct {
 	Webpage       string          `json:"webpage" gorm:"type:varchar(32)"`
 }
 
-// TODO: Add serial number here
 type LibraryCollection struct {
 	gorm.Model
 	ID           int                       `json:"id" gorm:"type:int;primaryKey;size:32"`
-	SerialNumber string                    `json:"serialNumber" gorm:"type:varchar(32);unique;not null"`
+	SerialNumber string                    `json:"serialNumber" gorm:"type:varchar(32);not null"`
 	LibraryID    int                       `gorm:"type:int;size:32;autoIncrement:false"`
 	Library      LibraryData               `json:"library" gorm:"foreignKey:LibraryID"`
 	BookID       int                       `gorm:"type:int;size:32;autoIncrement:false"`
 	Book         Book                      `json:"book" gorm:"foreignKey:BookID"`
-	Availability bool                      `json:"availability" gorm:"not null"`
+	Availability int                       `json:"availability" gorm:"not null"`
 	Status       int                       `json:"status" gorm:"type:int;size:32;not null"`
 	Borrow       []LibraryCollectionBorrow `json:"borrowHistory" gorm:"foreignKey:CollectionID"`
 }
@@ -77,11 +76,4 @@ type LibraryPaperAccess struct {
 	CreatedAt    time.Time              `json:"createdAt" gorm:"type:timestamp with time zone"`
 	PermissionID int                    `gorm:"type:int;size:32;autoIncrement:false"`
 	Permission   LibraryPaperPermission `json:"paper" gorm:"foreignKey:PermissionID"`
-}
-
-type LibraryVisit struct {
-	gorm.Model
-	UserID  int            `gorm:"type:int;size:32;autoIncrement:false"`
-	User    ProfileAccount `json:"user" gorm:"foreignKey:UserID"`
-	Purpose string         `json:"purpose" gorm:"type:varchar(128)"`
 }

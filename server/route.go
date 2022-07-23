@@ -19,6 +19,7 @@ func Serve(port string) {
 	r := mux.NewRouter()
 
 	// NOTE: db handler
+	// remove if unused
 	r.HandleFunc("/db/migrate", testMigrate).Methods("GET")
 	r.HandleFunc("/db/seed/profile", testSeedProfile).Methods("GET")
 	r.HandleFunc("/db/seed/book", testSeedBook).Methods("GET")
@@ -29,7 +30,10 @@ func Serve(port string) {
 	r.HandleFunc("/admin/library", adminInformation).Methods("GET")
 	r.HandleFunc("/admin/library/login", adminLogin).Methods("POST")
 	r.HandleFunc("/admin/library/dashboard", libraryDashboard).Methods("GET")
-	// r.HandleFunc("/admin/library/books", libraryBooks).Methods("GET")
+	r.HandleFunc("/admin/library/collection", libraryBooks).Methods("GET")
+	r.HandleFunc("/admin/library/collection/new", libraryAddCollection).Methods("POST")
+	r.HandleFunc("/admin/library/collection/{id}", librarySingleBook).Methods("GET")
+	r.HandleFunc("/admin/library/collection/{id}/update", libraryUpdateCollection).Methods("POST")
 
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")

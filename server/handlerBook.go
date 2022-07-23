@@ -134,29 +134,17 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 	result := database.Book{}
 	query := database.DB.Preload("BookDetail").
 		Where("slug = ?", slug).Find(&result)
-	err := query.Error
+	exist, err := checkExist(query)
 	if err != nil {
 		intServerError(w, err)
 		return
 	}
-	exist := query.RowsAffected
 	bookRespBody := bookResponse{}
 	subResult := []database.LibraryCollection{}
 	libRespBody := []libraryCollectionResponse{}
 
 	if exist != 0 {
-		bookRespBody.Title = result.Title
-		bookRespBody.Image = result.Image
-		bookRespBody.Author = result.Author
-		bookRespBody.Slug = result.Slug
-		bookRespBody.Source = result.Source
-		bookRespBody.ReleaseDate = result.BookDetail.ReleaseDate
-		bookRespBody.Description = result.BookDetail.Description
-		bookRespBody.Language = result.BookDetail.Language
-		bookRespBody.Country = result.BookDetail.Country
-		bookRespBody.PageCount = result.BookDetail.PageCount
-		bookRespBody.Publisher = result.BookDetail.Publisher
-		bookRespBody.Category = result.BookDetail.Category
+		bookRespBody = setBookResponse(result)
 
 		err = database.DB.
 			Preload("Library").
@@ -196,7 +184,7 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 		bookRespBody.Description = *details.Description
 		bookRespBody.Language = *details.Language
 		bookRespBody.Country = *details.Country
-		bookRespBody.PageCount = *details.PageCount
+		bookRespBody.PageCount = int(*details.PageCount)
 		bookRespBody.Publisher = *details.Publisher
 		bookRespBody.Category = *details.Category
 		bookRespBody.Origin = *result.OriginalURL

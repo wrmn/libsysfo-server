@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func testMigrate(w http.ResponseWriter, r *http.Request) {
+func testMigrate(w http.ResponseWriter, _ *http.Request) {
 	err := database.DB.AutoMigrate(
 		&database.Book{},
 		&database.BookDetail{},
@@ -20,7 +20,6 @@ func testMigrate(w http.ResponseWriter, r *http.Request) {
 		&database.LibraryPaperAccess{},
 		&database.Feedback{},
 		&database.ThirdPartyJobs{},
-		&database.LibraryVisit{},
 	)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -34,23 +33,22 @@ func testMigrate(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func testSeedProfile(w http.ResponseWriter, r *http.Request) {
+func testSeedProfile(_ http.ResponseWriter, _ *http.Request) {
 	database.SeedProfileAccount()
 	database.SeedProfileData()
 }
 
-func testSeedBook(w http.ResponseWriter, r *http.Request) {
+func testSeedBook(_ http.ResponseWriter, _ *http.Request) {
 	// NOTE: this need API make sure seed it when it needed to be
 	database.SeedBook()
 	database.SeedBookDetail()
 }
 
-func testSeedLibrary(w http.ResponseWriter, r *http.Request) {
+func testSeedLibrary(_ http.ResponseWriter, _ *http.Request) {
 	database.SeedLibraryData()
 	database.SeedLibraryCollection()
 	database.SeedLibraryCollectionBorrow()
 	database.SeedLibraryPaper()
 	database.SeedLibraryPaperPermission()
 	database.SeedLibraryPaperAccess()
-	database.SeedLibraryVisit()
 }

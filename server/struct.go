@@ -47,6 +47,7 @@ type libraryResponse struct {
 }
 
 type bookResponse struct {
+	Id          int                        `json:"id,omitempty"`
 	Title       string                     `json:"title"`
 	Image       string                     `json:"image"`
 	Author      string                     `json:"author"`
@@ -56,7 +57,7 @@ type bookResponse struct {
 	Language    string                     `json:"language,omitempty"`
 	Country     string                     `json:"country,omitempty"`
 	Publisher   string                     `json:"publisher,omitempty"`
-	PageCount   float64                    `json:"pageCount,omitempty"`
+	PageCount   int                        `json:"pageCount,omitempty"`
 	Category    string                     `json:"category,omitempty"`
 	Origin      string                     `json:"origin,omitempty"`
 	Source      string                     `json:"source,omitempty"`
@@ -69,7 +70,7 @@ type libraryCollectionResponse struct {
 	Name         string    `json:"name,omitempty"`
 	LibraryId    int       `json:"libraryId,omitempty"`
 	Coordinate   []float64 `json:"coordinate,omitempty"`
-	Availability bool      `json:"availability"`
+	Availability int       `json:"availability"`
 	Status       int       `json:"status"`
 }
 
@@ -221,4 +222,33 @@ type datarange struct {
 	Id       int
 	FromDate string
 	ToDate   string
+}
+
+type collectionUpdateRequest struct {
+	Status       int `json:"status"`
+	Availability int `json:"availability"`
+}
+
+type collectionAddRequests struct {
+	Book       *bookRequest           `json:"book,omitempty"`
+	BookSlug   *string                `json:"slug,omitempty"`
+	Collection []collectionAddRequest `json:"collection"`
+}
+
+type collectionAddRequest struct {
+	SerialNumber string `json:"sn"`
+	Availability int    `json:"availability"`
+}
+
+type bookRequest struct {
+	Title       string `json:"title"`
+	Image       []byte `json:"image"`
+	Author      string `json:"author"`
+	ReleaseDate string `json:"releaseDate"`
+	Description string `json:"description"`
+	Language    string `json:"language"`
+	Country     string `json:"country"`
+	Publisher   string `json:"publisher"`
+	PageCount   int    `json:"pageCount"`
+	Category    string `json:"category"`
 }

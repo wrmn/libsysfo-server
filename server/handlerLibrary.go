@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func allLibraries(w http.ResponseWriter, r *http.Request) {
+func allLibraries(w http.ResponseWriter, _ *http.Request) {
 	result := []database.LibraryData{}
 	database.DB.Find(&result)
 	var libRespBody []libraryResponse
