@@ -261,37 +261,17 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 }
 
 func profileInformation(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
-	data := database.ProfileAccount{}
-	cred := tokenData.Claims.(*cred.TokenModel)
-	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
-		Preload("ProfileData").First(&data)
 
 	permissionData := searchPermission(data.ID)
 	borrowData := searchBorrow(data.ID)
 
 	response{
 		Data: responseBody{
-			Profile: profileResponse{
-				Username:     data.Username,
-				Email:        data.Email,
-				Verified:     data.ProfileData.VerifiedAt,
-				Name:         data.ProfileData.Name,
-				Gender:       data.ProfileData.Gender,
-				PlaceOfBirth: data.ProfileData.PlaceOfBirth,
-				DateOfBirth:  data.ProfileData.DateOfBirth,
-				Address:      data.ProfileData.Address1,
-				Institution:  data.ProfileData.Institution,
-				Profession:   data.ProfileData.Profession,
-				PhoneCode:    data.ProfileData.PhoneCode,
-				PhoneNo:      data.ProfileData.PhoneNo,
-				IsWhatsapp:   data.ProfileData.IsWhatsapp,
-				Images:       data.ProfileData.Images,
-			},
+			Profile:    generateProfileResponse(data),
 			Permission: permissionData,
 			Borrow:     borrowData,
 		},

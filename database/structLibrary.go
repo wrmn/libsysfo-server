@@ -36,13 +36,14 @@ type LibraryCollection struct {
 type LibraryCollectionBorrow struct {
 	ID           int               `json:"id" gorm:"type:int;primaryKey;size:32"`
 	CreatedAt    time.Time         `json:"createdAt" gorm:"type:timestamp with time zone"`
+	AcceptedAt   *time.Time        `json:"acceptedAt" gorm:"type:timestamp with time zone"`
 	TakedAt      *time.Time        `json:"takedAt" gorm:"type:timestamp with time zone"`
 	ReturnedAt   *time.Time        `json:"returnedAt" gorm:"type:timestamp with time zone"`
+	CanceledAt   *time.Time        `json:"canceledAt" gorm:"type:timestamp with time zone"`
 	CollectionID int               `gorm:"type:int;size:32;autoIncrement:false"`
 	Collection   LibraryCollection `json:"collection" gorm:"foreignKey:CollectionID"`
 	UserID       int               `gorm:"type:int;size:32;autoIncrement:false"`
 	User         ProfileAccount    `json:"user" gorm:"foreignKey:UserID"`
-	Status       string            `json:"status" gorm:"type:varchar(16)"`
 }
 
 type LibraryPaper struct {

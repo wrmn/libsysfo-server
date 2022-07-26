@@ -10,16 +10,10 @@ import (
 )
 
 func profileBorrow(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
-
-	data := database.ProfileAccount{}
-	cred := tokenData.Claims.(*cred.TokenModel)
-	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
-		Preload("ProfileData").First(&data)
 
 	borrowData := searchBorrow(data.ID)
 
@@ -33,26 +27,36 @@ func profileBorrow(w http.ResponseWriter, r *http.Request) {
 	}.responseFormatter(w)
 }
 
-func searchBorrow(id int) (respBody []profileCollectionBorrow) {
+func searchBorrow(id int) []profileCollectionBorrow {
 
 	data := []database.LibraryCollectionBorrow{}
 	database.DB.Where("user_id = ?", id).
 		Preload("Collection.Library").
 		Preload("Collection.Book").
+		Preload("User").
 		Order("created_at desc").
 		Find(&data)
 
+	return appendData(data)
+}
+
+func appendData(data []database.LibraryCollectionBorrow) (respBody []profileCollectionBorrow) {
 	for _, d := range data {
 		respBody = append(respBody, profileCollectionBorrow{
 			CreatedAt:    d.CreatedAt,
+			AcceptedAt:   d.AcceptedAt,
 			TakedAt:      d.TakedAt,
 			ReturnedAt:   d.ReturnedAt,
+			CanceledAt:   d.CanceledAt,
 			Title:        d.Collection.Book.Title,
 			SerialNumber: d.Collection.SerialNumber,
+			CollectionId: d.Collection.ID,
 			Slug:         d.Collection.Book.Slug,
 			LibraryId:    d.Collection.LibraryID,
 			Library:      d.Collection.Library.Name,
-			Status:       d.Status,
+			UserId:       d.User.ID,
+			UserName:     d.User.ProfileData.Name,
+			Status:       setStatus(d),
 		})
 	}
 	return
@@ -67,7 +71,13 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		unauthorizedRequest(w, err)
 		return
 	}
+
 	cred := tokenData.Claims.(*cred.TokenModel)
+	user, err := getUser(cred)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -81,11 +91,6 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := getUser(cred)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		return
-	}
 	stats, err := userStats(user.ID)
 	if err != nil || !stats {
 		badRequest(w, "Please verify your email address and fill all profile information")
@@ -94,22 +99,21 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 	collectionData := database.LibraryCollection{}
 
 	statsCollection := database.DB.
-		Where("id = ? AND availability = true", e.Id).
+		Where("id = ? AND availability = ?", e.Id, 1).
 		Find(&collectionData).
 		RowsAffected
 
 	if statsCollection == 0 {
-		badRequest(w, "Buku tidak tersedia")
+		badRequest(w, "Book is not available")
 		return
 	}
 
-	collectionData.Availability = 0
+	collectionData.Availability = 3
 
 	borrowData := database.LibraryCollectionBorrow{
 		UserID:       user.ID,
 		CollectionID: e.Id,
 		CreatedAt:    time.Now(),
-		Status:       "requested",
 	}
 	err = database.DB.Save(&collectionData).Error
 

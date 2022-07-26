@@ -1,38 +1,27 @@
 package server
 
 import (
-	"errors"
 	"libsysfo-server/database"
-	"libsysfo-server/utility/cred"
 	"net/http"
 	"time"
-
-	"github.com/golang-jwt/jwt/v4"
 )
 
 func adminLogin(w http.ResponseWriter, r *http.Request) {
 	user, err := getLoginData(r)
 	if err != nil {
-		badRequest(w, err.Error())
+		unauthorizedRequest(w, err)
 		return
 	} else if user.AccountType != 2 {
-		err := errors.New("user not allowed")
-		unauthorizedRequest(w, err)
+		badRequest(w, "user not allowed")
 		return
 	}
 	loginHandler(w, user)
 }
 
 func adminInformation(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		return
-	}
 
-	data, err := adminData(tokenData)
-	if err != nil {
-		unauthorizedRequest(w, err)
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
 	response{
@@ -56,14 +45,9 @@ func adminInformation(w http.ResponseWriter, r *http.Request) {
 }
 
 func libraryDashboard(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		return
-	}
-	data, err := adminData(tokenData)
-	if err != nil {
-		unauthorizedRequest(w, err)
+
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
 
@@ -199,10 +183,12 @@ func getBorrowDataset(q datarange) (borrowBody []borrowDataset) {
 	borrowRows, _ := database.DB.Raw(`SELECT
 		COUNT(*) as count,
 		date_trunc('month', library_collection_borrows.created_at) as month,
-		SUM(CASE WHEN library_collection_borrows.status = 'requested' THEN 1 ELSE 0 END) as requested,
-		SUM(CASE WHEN library_collection_borrows.status = 'taked' THEN 1 ELSE 0 END) as taked,
-		SUM(CASE WHEN library_collection_borrows.status = 'finished' THEN 1 ELSE 0 END) as finished,
-		SUM(CASE WHEN library_collection_borrows.status = 'canceled' THEN 1 ELSE 0 END) as canceled
+		SUM(CASE WHEN 
+			library_collection_borrows.returned_at IS NOT NULL 
+		THEN 1 ELSE 0 END) as finished,
+		SUM(CASE WHEN 
+			library_collection_borrows.canceled_at IS NOT NULL
+		THEN 1 ELSE 0 END) as canceled
   	FROM library_collection_borrows
 	LEFT JOIN library_collections 
 	ON library_collections.id=library_collection_borrows.collection_id
@@ -218,12 +204,35 @@ func getBorrowDataset(q datarange) (borrowBody []borrowDataset) {
 	return borrowBody
 }
 
-func adminData(tokenData *jwt.Token) (data database.ProfileAccount, err error) {
-	cred := tokenData.Claims.(*cred.TokenModel)
-	count := database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
-		Preload("Library").First(&data).RowsAffected
-	if count != 1 {
-		return data, errors.New("user not found")
+func libraryUserFind(w http.ResponseWriter, r *http.Request) {
+	_, invalid := checkToken(r, w)
+	if invalid {
+		return
 	}
-	return data, nil
+
+	result := []profileResponse{}
+	userResult := []database.ProfileAccount{}
+	database.DB.Table("profile_accounts").
+		Scopes(userFindFilter(r)).
+		Preload("ProfileData").
+		Find(&userResult)
+
+	for i, k := range userResult {
+		result = append(result, profileResponse{
+			Id:       &userResult[i].ID,
+			Username: k.Username,
+			Email:    k.Email,
+			Verified: k.ProfileData.VerifiedAt,
+			Name:     k.ProfileData.Name,
+		})
+	}
+
+	response{
+		Data: responseBody{
+			User: result,
+		},
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "success",
+	}.responseFormatter(w)
 }

@@ -14,16 +14,10 @@ import (
 )
 
 func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
-
-	data := database.ProfileAccount{}
-	cred := tokenData.Claims.(*cred.TokenModel)
-	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
-		Preload("ProfileData").First(&data)
 
 	permissionData := searchPermission(data.ID)
 
@@ -38,25 +32,20 @@ func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
 }
 
 func profileReadPaper(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
 	id := mux.Vars(r)["id"]
-	if err != nil {
-		unauthorizedRequest(w, err)
+
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
-
-	data := database.ProfileAccount{}
-	cred := tokenData.Claims.(*cred.TokenModel)
-	database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
-		Preload("ProfileData").First(&data)
-
 	permissionData := database.LibraryPaperPermission{}
 	row := database.DB.
 		Where("id = ? AND user_id = ?", id, data.ID).
 		Preload("Paper").Find(&permissionData).RowsAffected
 
 	if row == 0 {
-		unauthorizedRequest(w, errors.New("data not found"))
+		badRequest(w, "data not found")
+		return
 	}
 
 	resp, err := http.Get(permissionData.Paper.PaperUrl)
@@ -67,7 +56,8 @@ func profileReadPaper(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		intServerError(w, errors.New("drive server timeout"))
+		return
 	}
 
 	access := database.LibraryPaperAccess{
@@ -108,7 +98,13 @@ func profileNewPermission(w http.ResponseWriter, r *http.Request) {
 		unauthorizedRequest(w, err)
 		return
 	}
+
 	cred := tokenData.Claims.(*cred.TokenModel)
+	user, err := getUser(cred)
+	if err != nil {
+		unauthorizedRequest(w, err)
+		return
+	}
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -119,12 +115,6 @@ func profileNewPermission(w http.ResponseWriter, r *http.Request) {
 		} else {
 			badRequest(w, err.Error())
 		}
-		return
-	}
-
-	user, err := getUser(cred)
-	if err != nil {
-		unauthorizedRequest(w, err)
 		return
 	}
 

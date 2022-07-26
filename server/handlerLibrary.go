@@ -54,7 +54,7 @@ func singleLibrary(w http.ResponseWriter, r *http.Request) {
 		database.DB.Where("library_id=?", result.ID).Find(&book).RowsAffected,
 		database.DB.Where("library_id=?", result.ID).Find(&paper).RowsAffected
 
-	bookData, err := getLibraryBook(reqId)
+	bookData, err := getLibraryBook(reqId, r)
 	if err != nil {
 		intServerError(w, err)
 		return

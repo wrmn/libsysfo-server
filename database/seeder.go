@@ -280,27 +280,35 @@ func SeedLibraryCollectionBorrow() {
 	var data []LibraryCollectionBorrow
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
-	status := []string{"requested", "taked", "finished", "canceled"}
 
 	for i := 0; i < 1000; i++ {
-		statint := rand.Intn(4)
+		statint := rand.Intn(5)
 		randDate := utility.DateRandom("2022-01-01", "2022-07-31")
+		acceptedDate := randDate.Add(time.Duration(rand.Intn(12)+1) * time.Hour)
+		takedDate := acceptedDate.Add(24 * time.Hour)
+		returnedDate := randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)
+		canceledDate := randDate.Add(time.Duration(rand.Intn(12)+13) * time.Hour)
 
 		singleData := LibraryCollectionBorrow{
 			CreatedAt:    randDate,
 			CollectionID: rand.Intn(600) + 1,
 			UserID:       rand.Intn(23) + 8,
-			Status:       status[statint],
 		}
 
-		if statint == 2 || statint == 1 {
-			takedDate := randDate.Add(24 * time.Hour)
+		if statint == 1 || statint == 2 || statint == 3 {
+			singleData.AcceptedAt = &acceptedDate
+		}
+
+		if statint == 2 || statint == 3 {
 			singleData.TakedAt = &takedDate
 		}
-		if statint == 2 {
-			returnedDate := randDate.Add(time.Duration(24+rand.Intn(200)+1) * time.Hour)
-			singleData.ReturnedAt = &returnedDate
 
+		if statint == 3 {
+			singleData.ReturnedAt = &returnedDate
+		}
+
+		if (statint == 1 && rand.Intn(5)%2 == 0) || statint == 4 {
+			singleData.CanceledAt = &canceledDate
 		}
 
 		data = append(data, singleData)

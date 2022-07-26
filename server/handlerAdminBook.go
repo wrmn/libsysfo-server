@@ -11,34 +11,30 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func libraryBooks(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		return
-	}
-	data, err := adminData(tokenData)
-	if err != nil {
-		unauthorizedRequest(w, err)
+func libraryCollections(w http.ResponseWriter, r *http.Request) {
+
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
 
 	libOwn := database.LibraryData{}
 
-	err = database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
+	err := database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
 	if err != nil {
 		intServerError(w, err)
 		return
 	}
 
-	bookData, err := getLibraryBook(libOwn.ID)
+	respBody := []bookResponse{}
+	bookData, err := getLibraryBook(libOwn.ID, r)
 	if err != nil {
 		intServerError(w, err)
 		return
 	}
 	response{
 		Data: responseBody{
-			Book: &bookData,
+			Book: append(respBody, bookData...),
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
@@ -46,7 +42,7 @@ func libraryBooks(w http.ResponseWriter, r *http.Request) {
 	}.responseFormatter(w)
 }
 
-func librarySingleBook(w http.ResponseWriter, r *http.Request) {
+func librarySingleCollection(w http.ResponseWriter, r *http.Request) {
 	collectionId := mux.Vars(r)["id"]
 	resultCollection := database.LibraryCollection{}
 	resultBook := database.Book{}
@@ -79,22 +75,15 @@ func librarySingleBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		return
-	}
 
-	data, err := adminData(tokenData)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		fmt.Println("here")
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
 
 	libOwn := database.LibraryData{}
 
-	err = database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
+	err := database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
 	if err != nil {
 		intServerError(w, err)
 		return
@@ -229,17 +218,9 @@ func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
 }
 
 func libraryUpdateCollection(w http.ResponseWriter, r *http.Request) {
-	tokenData, err := authVerification(r)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		return
-	}
 	collectionId := mux.Vars(r)["id"]
-
-	auth, err := adminData(tokenData)
-	if err != nil {
-		unauthorizedRequest(w, err)
-		fmt.Println("here")
+	data, invalid := checkToken(r, w)
+	if invalid {
 		return
 	}
 
@@ -248,7 +229,7 @@ func libraryUpdateCollection(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&e)
+	err := decoder.Decode(&e)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {
 			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
@@ -270,7 +251,7 @@ func libraryUpdateCollection(w http.ResponseWriter, r *http.Request) {
 
 	libOwn := database.LibraryData{}
 
-	err = database.DB.Where("user_id = ?", auth.ID).Find(&libOwn).Error
+	err = database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
 	if err != nil {
 		intServerError(w, err)
 		return
@@ -283,6 +264,7 @@ func libraryUpdateCollection(w http.ResponseWriter, r *http.Request) {
 
 	err = database.DB.Model(&resultCollection).
 		Updates(database.LibraryCollection{
+			SerialNumber: e.SerialNumber,
 			Status:       e.Status,
 			Availability: e.Availability}).
 		Error

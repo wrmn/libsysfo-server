@@ -23,6 +23,7 @@ type responseBody struct {
 	Borrow     interface{} `json:"borrow,omitempty"`
 	Permission interface{} `json:"permission,omitempty"`
 	Dataset    interface{} `json:"dataset,omitempty"`
+	User       interface{} `json:"user,omitempty"`
 	Token      string      `json:"token,omitempty"`
 	Paginate   *paginate   `json:"paginate,omitempty"`
 }
@@ -97,6 +98,7 @@ type paperResponse struct {
 }
 
 type profileResponse struct {
+	Id           *int        `json:"id,omitempty"`
 	Username     *string     `json:"username,omitempty"`
 	Email        string      `json:"email,omitempty"`
 	Verified     interface{} `json:"verivied,omitempty"`
@@ -109,7 +111,7 @@ type profileResponse struct {
 	Profession   *string     `json:"profession,omitempty"`
 	PhoneCode    *string     `json:"phoneCode,omitempty"`
 	PhoneNo      *string     `json:"phoneNo,omitempty"`
-	IsWhatsapp   bool        `json:"isWhatsapp,omitempty"`
+	IsWhatsapp   *bool       `json:"isWhatsapp,omitempty"`
 	Images       string      `json:"images,omitempty"`
 }
 
@@ -125,14 +127,20 @@ type profilePermissionResponse struct {
 }
 
 type profileCollectionBorrow struct {
+	BorrowId     *int       `json:"id,omitempty"`
 	CreatedAt    time.Time  `json:"createdAt"`
+	AcceptedAt   *time.Time `json:"acceptedAt"`
 	TakedAt      *time.Time `json:"takedAt"`
 	ReturnedAt   *time.Time `json:"returnedAt"`
+	CanceledAt   *time.Time `json:"canceledAt"`
 	Title        string     `json:"title"`
 	SerialNumber string     `json:"serialNumber"`
+	CollectionId int        `json:"collectionId"`
 	Slug         string     `json:"slug"`
-	LibraryId    int        `json:"libraryId"`
-	Library      string     `json:"libraryName"`
+	LibraryId    int        `json:"libraryId,omitempty"`
+	Library      string     `json:"libraryName,omitempty"`
+	UserId       int        `json:"userId,omitempty"`
+	UserName     string     `json:"userName,omitempty"`
 	Status       string     `json:"status"`
 }
 
@@ -225,8 +233,9 @@ type datarange struct {
 }
 
 type collectionUpdateRequest struct {
-	Status       int `json:"status"`
-	Availability int `json:"availability"`
+	SerialNumber string `json:"sn"`
+	Status       int    `json:"status"`
+	Availability int    `json:"availability"`
 }
 
 type collectionAddRequests struct {

@@ -25,15 +25,21 @@ func Serve(port string) {
 	r.HandleFunc("/db/seed/book", testSeedBook).Methods("GET")
 	r.HandleFunc("/db/seed/library", testSeedLibrary).Methods("GET")
 
-	r.HandleFunc("/feedback", newFeedback).Methods("POST")
-
 	r.HandleFunc("/admin/library", adminInformation).Methods("GET")
 	r.HandleFunc("/admin/library/login", adminLogin).Methods("POST")
 	r.HandleFunc("/admin/library/dashboard", libraryDashboard).Methods("GET")
-	r.HandleFunc("/admin/library/collection", libraryBooks).Methods("GET")
+
+	r.HandleFunc("/admin/library/collection", libraryCollections).Methods("GET")
 	r.HandleFunc("/admin/library/collection/new", libraryAddCollection).Methods("POST")
-	r.HandleFunc("/admin/library/collection/{id}", librarySingleBook).Methods("GET")
+	r.HandleFunc("/admin/library/collection/{id}", librarySingleCollection).Methods("GET")
 	r.HandleFunc("/admin/library/collection/{id}/update", libraryUpdateCollection).Methods("POST")
+
+	r.HandleFunc("/admin/library/borrow", libraryBorrow).Methods("GET")
+	r.HandleFunc("/admin/library/borrow/detail", getBorrow).Methods("GET")
+
+	r.HandleFunc("/admin/library/user/find", libraryUserFind).Methods("GET")
+	r.HandleFunc("/admin/library/user/{id}", libraryUser).Methods("GET")
+	r.HandleFunc("/admin/library/user/{id}/borrow", libraryUserBorrow).Methods("GET")
 
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")
@@ -64,6 +70,8 @@ func Serve(port string) {
 
 	r.HandleFunc("/paper", allPapers).Methods("GET")
 	r.HandleFunc("/paper/{id}", singlePaper).Methods("GET")
+
+	r.HandleFunc("/feedback", newFeedback).Methods("POST")
 
 	r.MethodNotAllowedHandler = handleNotAllowed()
 	r.NotFoundHandler = handleNotFound()
