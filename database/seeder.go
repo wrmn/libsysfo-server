@@ -78,6 +78,28 @@ func SeedProfileData() {
 	DB.Create(&data)
 }
 
+func SeedBookLocal() {
+	content, err := ioutil.ReadFile("./sampleData/bookData.json")
+	if err != nil {
+		fmt.Println("Error when opening file: ", err)
+		return
+	}
+
+	var payload bookDataset
+
+	err = json.Unmarshal(content, &payload)
+	if err != nil {
+		fmt.Println("error Unmarshal")
+		return
+	}
+
+	for i := range payload.Books {
+		payload.Books[i].Slug = payload.Books[i].SlugGenerator()
+		payload.Books[i].BookDetail.Description = gofakeit.LoremIpsumSentence(20)
+		DB.Create(&payload.Books[i])
+	}
+}
+
 func SeedBook() {
 	data := []Book{}
 	client := &http.Client{
@@ -132,61 +154,61 @@ func SeedBook() {
 }
 
 func SeedBookDetail() {
-	var dataDetails []BookDetail
 	var dataBooks []*Book
 	DB.Find(&dataBooks)
-	for _, dataBook := range dataBooks {
-		client := &http.Client{
-			Timeout: time.Second * 10,
-		}
-		link := fmt.Sprintf("%s/api/books/%s/detail", os.Getenv("BOOK_SERVER_URL"), dataBook.Slug)
-		req, err := http.NewRequest("GET", link, nil)
-		if err != nil {
-			log.Fatal("error nih")
-			return
-		}
-		req.Header.Set("user-agent", "golang application")
-		req.Header.Add("Accept", "application/json")
-		req.Header.Add("Authorization", "Bearer 10|6UHnWG0z8pBYl60Dm0ioMBjwPGuRoGodYcr0X80o")
-		response, err := client.Do(req)
-		if err != nil {
-			log.Fatal("error nih")
-			return
-		}
-		defer response.Body.Close()
-		b, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			log.Fatal("error nih")
-			return
-		}
-		if response.StatusCode == 200 {
-			var template bookserver.BookResponse
-
-			err = json.Unmarshal(b, &template)
+	for i, dataBook := range dataBooks {
+		if dataBooks[i].Source == "gramedia" {
+			client := &http.Client{
+				Timeout: time.Second * 10,
+			}
+			link := fmt.Sprintf("%s/api/books/%s/detail", os.Getenv("BOOK_SERVER_URL"), dataBook.Slug)
+			req, err := http.NewRequest("GET", link, nil)
 			if err != nil {
 				log.Fatal("error nih")
 				return
 			}
+			req.Header.Set("user-agent", "golang application")
+			req.Header.Add("Accept", "application/json")
+			req.Header.Add("Authorization", "Bearer 10|6UHnWG0z8pBYl60Dm0ioMBjwPGuRoGodYcr0X80o")
+			response, err := client.Do(req)
+			if err != nil {
+				log.Fatal("error nih")
+				return
+			}
+			defer response.Body.Close()
+			b, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				log.Fatal("error nih")
+				return
+			}
+			if response.StatusCode == 200 {
+				var template bookserver.BookResponse
 
-			responseBody := *template.Book.Detail
+				err = json.Unmarshal(b, &template)
+				if err != nil {
+					log.Fatal("error nih")
+					return
+				}
 
-			dataDetails = append(dataDetails, BookDetail{
-				ID:          dataBook.ID,
-				ReleaseDate: *responseBody.ReleaseDate,
-				Description: *responseBody.Description,
-				Language:    *responseBody.Language,
-				Country:     *responseBody.Country,
-				Publisher:   *responseBody.Publisher,
-				PageCount:   int(*responseBody.PageCount),
-				Category:    *responseBody.Category,
-			})
+				responseBody := *template.Book.Detail
+
+				dataDetails := BookDetail{
+					ID:          dataBooks[i].ID,
+					ReleaseDate: *responseBody.ReleaseDate,
+					Description: *responseBody.Description,
+					Language:    *responseBody.Language,
+					Country:     *responseBody.Country,
+					Publisher:   *responseBody.Publisher,
+					PageCount:   int(*responseBody.PageCount),
+					Category:    *responseBody.Category,
+				}
+				DB.Create(&dataDetails)
+			}
 		}
 	}
-	DB.Create(&dataDetails)
 }
 
 func SeedLibraryData() {
-	var data []LibraryData
 	content := []string{
 		"https://i.pinimg.com/474x/24/ef/00/24ef0042f7c07e1aa47280106461b853.jpg",
 		"https://media.istockphoto.com/photos/library-bookshelves-with-books-and-textbooks-learning-and-education-picture-id1200326335?k=20&m=1200326335&s=612x612&w=0&h=TXy8Z48ULgGdJNWaNSXlGR5oQHCYD9rbBysf7U9w0HA=",
@@ -196,7 +218,7 @@ func SeedLibraryData() {
 		"https://archello.s3.eu-central-1.amazonaws.com/images/2021/03/03/g.o.-architecture-the-small--green-library-community-centres-archello.1614730556.2039.jpg",
 	}
 
-	data = append(data, LibraryData{
+	data := []LibraryData{{
 		UserID:        2,
 		Name:          "dinas perpustakaan dan kearsipan kota padang",
 		Address:       "Jl. Batang Anai, Rimbo Kaluang, Kec. Padang Bar., Kota Padang, Sumatera Barat",
@@ -205,7 +227,7 @@ func SeedLibraryData() {
 		ImagesMain:    "https://i.pinimg.com/originals/ff/96/ee/ff96eecd5f94fc82b561ef2812c541de.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
-	}, LibraryData{
+	}, {
 		UserID:        3,
 		Name:          "perpustakaan universitas andalas",
 		Address:       "3FP6+M4V Kampus Universitas Andalas, Limau Manis, Kec. Pauh, Kota Padang, Sumatera Barat 25175",
@@ -214,7 +236,7 @@ func SeedLibraryData() {
 		ImagesMain:    "https://pustaka.unand.ac.id/images/perpustakaan.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
-	}, LibraryData{
+	}, {
 		UserID:        4,
 		Name:          "perpustakaan pusat uin imam bonjol padang",
 		Address:       "399P+PVR, Kampus UIN Imam Bonjol Jl. Prof. Mahmud Yunus, Lubuk Lintah, Kec. Kuranji, Kota Padang, Sumatera Barat 25176",
@@ -223,7 +245,7 @@ func SeedLibraryData() {
 		ImagesMain:    "https://asset.kompas.com/crops/gj4bxVEM-ombeC7YhdMPWTQqMwA=/0x67:800x600/750x500/data/photo/2018/01/06/3283493641.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
-	}, LibraryData{
+	}, {
 		UserID:        5,
 		Name:          "perpustakaan universitas bung hatta",
 		Address:       "38VV+HQ5, North Ulak Karang, Padang Utara, Padang City, West Sumatra",
@@ -232,7 +254,7 @@ func SeedLibraryData() {
 		ImagesMain:    "https://i.pinimg.com/originals/ff/96/ee/ff96eecd5f94fc82b561ef2812c541de.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
-	}, LibraryData{
+	}, {
 		UserID:        6,
 		Name:          "UNP central library",
 		Address:       "483W+HR9, West Air Tawar, Padang Utara, Padang City, West Sumatra",
@@ -241,7 +263,7 @@ func SeedLibraryData() {
 		ImagesMain:    "https://www.agati.com/wp-content/uploads/2017/06/Diane-Lam-Blog-header.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
-	}, LibraryData{
+	}, {
 		UserID:        7,
 		Name:          "Perpustakaan Amanah",
 		Address:       "Bundo Kanduong No.1, Belakang Tangsi, Kec. Padang Bar., Kota Padang, Sumatera Barat",
@@ -250,7 +272,7 @@ func SeedLibraryData() {
 		ImagesMain:    "https://s26162.pcdn.co/wp-content/uploads/2021/01/bookshelf1.jpg",
 		ImagesContent: pq.StringArray(content),
 		Webpage:       "unand.ac.id",
-	})
+	}}
 
 	DB.Create(&data)
 }
@@ -267,7 +289,7 @@ func SeedLibraryCollection() {
 			data = append(data, LibraryCollection{
 				SerialNumber: fmt.Sprintf("1234.23.12.%d", sn),
 				LibraryID:    i + 1,
-				BookID:       rand.Intn(47) + 1,
+				BookID:       rand.Intn(85) + 1,
 				Availability: 1,
 				Status:       rand.Intn(4) + 1,
 			})
@@ -277,11 +299,12 @@ func SeedLibraryCollection() {
 }
 
 func SeedLibraryCollectionBorrow() {
-	var data []LibraryCollectionBorrow
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
 
 	for i := 0; i < 1000; i++ {
+		collection := LibraryCollection{}
+
 		statint := rand.Intn(5)
 		randDate := utility.DateRandom("2022-01-01", "2022-07-31")
 		acceptedDate := randDate.Add(time.Duration(rand.Intn(12)+1) * time.Hour)
@@ -295,6 +318,8 @@ func SeedLibraryCollectionBorrow() {
 			UserID:       rand.Intn(23) + 8,
 		}
 
+		DB.Where("id = ?", singleData.CollectionID).Find(&collection)
+
 		if statint == 1 || statint == 2 || statint == 3 {
 			singleData.AcceptedAt = &acceptedDate
 		}
@@ -303,21 +328,52 @@ func SeedLibraryCollectionBorrow() {
 			singleData.TakedAt = &takedDate
 		}
 
-		if statint == 3 {
+		if statint == 3 || (statint == 2 && time.Since(takedDate).Hours() >= 168) {
 			singleData.ReturnedAt = &returnedDate
+		} else if statint == 2 && time.Since(takedDate).Hours() <= 168 {
+			if collection.Availability == 1 {
+				collection.Availability = 3
+				DB.Save(&collection)
+			} else {
+				singleData.ReturnedAt = &returnedDate
+
+			}
+
 		}
 
 		if (statint == 1 && rand.Intn(5)%2 == 0) || statint == 4 {
 			singleData.CanceledAt = &canceledDate
 		}
-
-		data = append(data, singleData)
+		if collection.Availability != 2 {
+			DB.Create(&singleData)
+		}
 	}
-	DB.Create(&data)
 }
 
 func SeedLibraryPaper() {
 	var data []LibraryPaper
+
+	content, err := ioutil.ReadFile("./sampleData/paperData.json")
+	if err != nil {
+		fmt.Println("Error when opening file: ", err)
+		return
+	}
+
+	var payload paperDataset
+
+	err = json.Unmarshal(content, &payload)
+	if err != nil {
+		fmt.Println("error Unmarshal")
+		return
+	}
+
+	for _, k := range payload.Papers {
+		k.Abstract = gofakeit.LoremIpsumParagraph(3, 3, 10, " ")
+		k.Access = (rand.Intn(2) == 0)
+	}
+
+	data = append(data, payload.Papers...)
+
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
 	docType := []string{"journal", "thesis", "other document"}
@@ -344,7 +400,7 @@ func SeedLibraryPaperPermission() {
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 200; i++ {
 		acc := (rand.Intn(2) == 0)
-		paperId := rand.Intn(60) + 1
+		paperId := rand.Intn(80) + 1
 		data = append(data, LibraryPaperPermission{
 			PaperID:  paperId,
 			UserID:   rand.Intn(23) + 8,
@@ -362,7 +418,7 @@ func SeedLibraryPaperAccess() {
 	for i := 0; i < 1000; i++ {
 		data = append(data, LibraryPaperAccess{
 			CreatedAt:    utility.DateRandom("2022-01-01", "2022-07-31"),
-			PermissionID: rand.Intn(60) + 1,
+			PermissionID: rand.Intn(200) + 1,
 		})
 	}
 	DB.Create(&data)

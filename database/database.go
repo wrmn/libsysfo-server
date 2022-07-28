@@ -35,9 +35,15 @@ func Checker() {
 		dataBorrow := []LibraryCollectionBorrow{}
 		DB.Find(&dataBorrow)
 		for _, d := range dataBorrow {
-			diff := time.Since(d.CreatedAt)
-			if diff.Hours() >= 48 && d.Status == "requested" {
-				d.Status = "canceled"
+			var diff time.Duration
+			if d.AcceptedAt == nil {
+				diff = time.Since(d.CreatedAt)
+			} else {
+				diff = time.Since(*d.AcceptedAt)
+			}
+			if diff.Hours() >= 48 && d.TakedAt == nil {
+				now := time.Now()
+				d.CanceledAt = &now
 				DB.Save(&d)
 			}
 		}

@@ -1,0 +1,242 @@
+{
+  "books": [
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2Fadmi.jpg.jpg&width=400",
+      "title": "antropologi pendidikan",
+      "author": "mahmud",
+      "source": "local",
+      "detail": {
+        "release_date": "20 June 2012",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "CV. Pustaka Setia",
+        "page_count": 251,
+        "category": "Professional, Engineering & Technical"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=../../images/docs/22000220333.jpg.jpg&width=400",
+      "title": "teori pengkajian fiksi",
+      "author": "burhan nurgiyanto",
+      "source": "local",
+      "detail": {
+        "release_date": "18 January 2019",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "gadjah mada university press",
+        "page_count": 499,
+        "category": "Philosophy"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=../../images/docs/21000224535.jpg.jpg&width=400",
+      "title": "retorika: seni berbicara",
+      "author": "aristoteles",
+      "source": "local",
+      "detail": {
+        "release_date": "20 October 2018",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "BasaBasi",
+        "page_count": 416,
+        "category": "Philosophy"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F22000220659.jpg.jpg&width=400",
+      "title": "home ideas rumah bertingkat minimalis: desain simpel, elegan, masa kini",
+      "author": "dany maximus",
+      "source": "local",
+      "detail": {
+        "release_date": "30 September 2018",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "griya kreasi",
+        "page_count": 68,
+        "category": "Home & Architecture"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=../../images/docs/22000221391.jpg.jpg&width=400",
+      "title": "psikologi islam yang sempurna",
+      "author": "raehanul bahraen",
+      "source": "local",
+      "detail": {
+        "release_date": "21 September 2018",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "rumah ilmu",
+        "page_count": 226,
+        "category": "Islam"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2Fhukum_bisnis_syariah.jpg&width=400",
+      "title": "hukum bisnis syariah dalam alquran",
+      "author": "a. kadir",
+      "source": "local",
+      "detail": {
+        "release_date": "17 January 2015",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "sinar grafika offset",
+        "page_count": 168,
+        "category": "Islam"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2Fkajian_morfologi.jpg&width=400",
+      "title": "kajian morfologi ( bentuk derivasional dan infleksional )",
+      "author": "ida bagus putrayasa",
+      "source": "local",
+      "detail": {
+        "release_date": "3 March 2017",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "refika aditama",
+        "page_count": 122,
+        "category": "Philosophy"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2Fbps0093.jpg.jpg&width=400",
+      "title": "buku pintar praktis bahasa indonesia",
+      "author": "yettik wulandari",
+      "source": "local",
+      "detail": {
+        "release_date": "25 March 2016",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "wacana media",
+        "page_count": 308,
+        "category": "Philosophy"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F22000221228.jpg.jpg&width=400",
+      "title": "gramatika bahasa jepang modern",
+      "author": "sudjianto",
+      "source": "local",
+      "detail": {
+        "release_date": "25 October 2010",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "kesaint blanc",
+        "page_count": 157,
+        "category": "Philosophy"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F20000221013.jpg.jpg&width=400",
+      "title": "keterampilan membaca cerdas",
+      "author": "ermanto",
+      "source": "local",
+      "detail": {
+        "release_date": "1 December 2019",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "rajawali pers",
+        "page_count": 134,
+        "category": "Philosophy"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F20092.jpg.jpg&width=400",
+      "title": "kamus abreviasi bahasa indonesia",
+      "author": "noviatri",
+      "source": "local",
+      "detail": {
+        "release_date": "1 January 2015",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "suri",
+        "page_count": 159,
+        "category": "Philosophy"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F22000221371.jpg.jpg&width=400",
+      "title": "nusantara, sejarah indonesia",
+      "author": "vlekke, bernard h. m.",
+      "source": "local",
+      "detail": {
+        "release_date": "10 January 2022",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "KPG(kepustakaan populer gramedia)",
+        "page_count": 440,
+        "category": "History"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F22000221273.jpg.jpg&width=400",
+      "title": "sejarah dunia untuk pembaca muda",
+      "author": "gombrich, ernst h.",
+      "source": "local",
+      "detail": {
+        "release_date": "24 January 2020",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "cv.marjin kiri",
+        "page_count": 368,
+        "category": "History"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F22000220926.jpg.jpg&width=400",
+      "title": "sistem informasi geografi (SIG)",
+      "author": "zuldadan naspendra",
+      "source": "local",
+      "detail": {
+        "release_date": "13 April 2020",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "lppm universitas andalas",
+        "page_count": 152,
+        "category": "History"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F22000220916.jpg.jpg&width=400",
+      "title": "takhta raja-raja jawa: intrik dalam kekuasaan",
+      "author": "dwi lestari",
+      "source": "local",
+      "detail": {
+        "release_date": "1 Mei 2020",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "sociality",
+        "page_count": 280,
+        "category": "History"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=..%2F..%2Fimages%2Fdocs%2F190002232542.jpg.jpg&width=400",
+      "title": "kultur jaringan tanaman : solusi perbanyakan tanaman budi daya",
+      "author": "zulkarnain",
+      "source": "local",
+      "detail": {
+        "release_date": "1 February 2018",
+        "language": "indonesian",
+        "country": "indonesia",
+        "publisher": "bumi aksara",
+        "page_count": 249,
+        "category": "Science & Nature"
+      }
+    },
+    {
+      "image": "http://katalog.pustaka.unand.ac.id/lib/minigalnano/createthumb.php?filename=../../images/docs/21000224549.jpg.jpg&width=400",
+      "title": "gen: perjalanan menuju pusat",
+      "author": "mukherjee, siddhartha",
+      "source": "local",
+      "detail": {
+        "release_date": "1 June 2020",
+        "language": "indonesian",
+        "country": "jakarta",
+        "publisher": "KPG(kepustakaan populer gramedia)",
+        "page_count": 698,
+        "category": "Science & Nature"
+      }
+    }
+  ]
+}

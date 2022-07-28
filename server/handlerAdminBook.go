@@ -7,6 +7,7 @@ import (
 	"libsysfo-server/database"
 	"libsysfo-server/utility/imgkit"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -43,24 +44,19 @@ func libraryCollections(w http.ResponseWriter, r *http.Request) {
 }
 
 func librarySingleCollection(w http.ResponseWriter, r *http.Request) {
-	collectionId := mux.Vars(r)["id"]
-	resultCollection := database.LibraryCollection{}
-	resultBook := database.Book{}
-	err := database.DB.Where("id = ?", collectionId).
-		Find((&resultCollection)).Error
+	collectionId, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		badRequest(w, "invalid id request")
+	}
+
+	resultCollection, err := findCollectionById(collectionId)
 	if err != nil {
 		intServerError(w, err)
 	}
 
-	err = database.DB.Preload("BookDetail").
-		Where("id = ?", resultCollection.BookID).
-		Find(&resultBook).Error
-	if err != nil {
-		intServerError(w, err)
-	}
 	response{
 		Data: responseBody{
-			Book: setBookResponse(resultBook),
+			Book: setBookResponse(resultCollection.Book),
 			Collection: libraryCollectionResponse{
 				Id:           resultCollection.ID,
 				SerialNumber: resultCollection.SerialNumber,
@@ -78,6 +74,11 @@ func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
 
 	data, invalid := checkToken(r, w)
 	if invalid {
+		return
+	}
+
+	if data.AccountType != 2 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 
@@ -104,7 +105,7 @@ func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
 	}
 	result := database.Book{}
 	if e.Book != nil {
-		slug := slugGenerator(e.Book.Title)
+		slug := result.SlugGenerator()
 		img := imgkit.ImgInformation{
 			File:     e.Book.Image,
 			FileName: "book_cover",
@@ -149,7 +150,7 @@ func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
 	} else {
 		query := database.DB.Preload("BookDetail").
 			Where("slug = ?", *e.BookSlug).Find(&result)
-		exist, err := checkExist(query)
+		exist, err := database.CheckExist(query)
 		if err != nil {
 			intServerError(w, err)
 			return
@@ -221,6 +222,11 @@ func libraryUpdateCollection(w http.ResponseWriter, r *http.Request) {
 	collectionId := mux.Vars(r)["id"]
 	data, invalid := checkToken(r, w)
 	if invalid {
+		return
+	}
+
+	if data.AccountType != 2 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 

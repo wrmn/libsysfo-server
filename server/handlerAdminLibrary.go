@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"libsysfo-server/database"
 	"net/http"
 	"time"
@@ -19,11 +20,16 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func adminInformation(w http.ResponseWriter, r *http.Request) {
-
 	data, invalid := checkToken(r, w)
 	if invalid {
 		return
 	}
+
+	if data.AccountType != 2 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
+		return
+	}
+
 	response{
 		Data: responseBody{
 			Profile: adminInformationResponse{
@@ -48,6 +54,11 @@ func libraryDashboard(w http.ResponseWriter, r *http.Request) {
 
 	data, invalid := checkToken(r, w)
 	if invalid {
+		return
+	}
+
+	if data.AccountType != 2 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 

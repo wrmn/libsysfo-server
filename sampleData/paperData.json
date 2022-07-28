@@ -1,0 +1,283 @@
+{
+  "papers": [
+    {
+      "libraryId": 2,
+      "title": "pembangunan aplikasi web & mobile pengelolaan pemesanan travel antar jemput pada pt erte tour & travel",
+      "subject": ["t technology", "t technology (general)"],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknologi dan informasi",
+        "penulis": "tenti atika putri",
+        "keyword": "travel antar jemput alamat, pemesanan, penjemputan, web, mobile"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/1_enIVjp40o.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "pembangunan sistem informasi penilaian dan pelaksanaan mentoring agama islam universitas andalas",
+      "subject": ["t technology", "t technology (general)"],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknologi dan informasi",
+        "penulis": "meysa putri",
+        "keyword": "Mentoring Agama Islam, Laravel, Universitas Andalas"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/2_Qc1UHVZ79.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "pengembangan model convolutional neural network untuk mendeteksi ekspresi wajah dengan menggunakan emoji pada ujian mahasiswa di perguruan tinggi",
+      "subject": [
+        "q science",
+        "qa mathematics",
+        "qa76 computer software z bibliography",
+        "library science",
+        "information resources",
+        "z665 library science",
+        "information science"
+      ],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknologi dan informasi",
+        "penulis": "Ahmad Fadil DW",
+        "keyword": "Convolutional Neural Network, Emoji, Facial Expression Recognition, Ujian"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/3_nMXhgOr0z.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "pembangunan sistem informasi santri berbasis web menggunakan framework django pada yayasan shine alfalah di kota padang",
+      "subject": ["t technology", "t technology (general)"],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknologi dan informasi",
+        "penulis": "ilham akbar",
+        "keyword": "sistem informasi, santri, python, web, mysql"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/4_-p5RsEFTy.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "pembangunan aplikasi pengelolaan laporan kriminal berbasis web di polsek pauh padang",
+      "subject": [
+        "q science",
+        "qa mathematics",
+        "qa76 computer software z bibliography",
+        "library science",
+        "information resources",
+        "za information resources",
+        "za4450 databases"
+      ],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknologi dan informasi",
+        "penulis": "ivan rida rivaldo",
+        "keyword": "kriminal, laporan, spkt, polsek pauh padang"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/5_rRD74ayKs.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "pembangunan sistem informasi pengelolaan distribusi air minum dalam kemasan (AMDK) amia pada CV. ratna juwita",
+      "subject": [
+        "t technology",
+        "t technology (general)",
+        "z bibliography",
+        "library science",
+        "information resources",
+        "za information resources",
+        "za4450 databases"
+      ],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknologi dan informasi",
+        "penulis": "nadya aulia putri",
+        "keyword": "sistem informasi, pengelolaan, distribusi, air minum dalam kemasan, cv. ratna juwita"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/6_25XwSu2Wy.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "pengaruh penambahan ti02 pada biolibricant minyak kelapa sawit terhadap sifat koefisien geseknya",
+      "subject": ["t technology", "TJ Mechanical engineering and machinery"],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknik",
+        "penulis": "muhammad fikri",
+        "keyword": "pelumas, minyak nabati, minyak kelapa sawit, nano partikel tiO2, tribologi , pin on disc"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/7_jvps8Eo1G.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "pengujian gaya serat (drag) angin melewati odel 3D printing lokomotif kereta apo di terowongan angin desa variasi sudut hidung",
+      "subject": ["t technology", "TJ Mechanical engineering and machinery"],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknik",
+        "penulis": "luthfi alfikri",
+        "keyword": "gaya drag, kereta api, sudut hidung, wind tunnel, 3d printing"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/8_8q3zuE-03.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "detailed engineering design (DED) sistem penyediaan air minum ibu kota kecamatan tanjung raya kabupaten agam",
+      "subject": [
+        "t technology",
+        "td environmental technology",
+        "sanitary engineering"
+      ],
+      "type": "thesis",
+      "description": {
+        "fakultas": "teknik",
+        "penulis": "elsa alvionita",
+        "keyword": "detailed engineering design, sistem penyediaan air minum, kecamatan tanjung raya, pengolahan lengkap, reservoir"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/9_PxWuThflD.pdf"
+    },
+    {
+      "libraryId": 2,
+      "title": "perjanjian konstruksi antara pt graha bangun persada dengan dinas pekerjaan umum dan penataan ruang dalam hal normalisasi sungai batang nareh kabupaten padang pariaman",
+      "subject": ["K Law", "K Law (General)"],
+      "type": "thesis",
+      "description": {
+        "fakultas": "hukum",
+        "penulis": "mardelliani",
+        "keyword": "perjanjian konstruksi, penyedia jasa dan penataan ruang"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/10_6bA4QiRZk.pdf"
+    },
+    {
+      "libraryId": 3,
+      "title": "pemanfaatan teknologi informasi",
+      "subject": ["Teknologi", "Informasi"],
+      "type": "journal",
+      "description": {
+        "penulis": "erlisa dwi ananda"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/11_P1MezvA-Z.pdf"
+    },
+    {
+      "libraryId": 3,
+      "title": "pengelolaan perpustakaan digital",
+      "subject": [
+        "perpustakaan",
+        "digital",
+        "teknologi informasi",
+        "sumber informasi"
+      ],
+      "type": "journal",
+      "description": {
+        "penulis": "yuyun widayanti"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/12_7zQM7YR5v.PDF"
+    },
+    {
+      "libraryId": 3,
+      "title": "perpustakaan digital, koleksi digital dan undang-undang hak cipta",
+      "subject": [
+        "perpustakaan digital",
+        "koleksi digital dan undang-undang hak cipta"
+      ],
+      "type": "journal",
+      "description": {
+        "penulis": "siti wahdah"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/13_S04ZE__mDx.pdf"
+    },
+    {
+      "libraryId": 4,
+      "title": "pengembangan perpustakaan digital untuk mempermudah aksesInformasi",
+      "subject": [
+        "digital libraries",
+        "information access",
+        "the information age."
+      ],
+      "type": "journal",
+      "description": {
+        "penulis": "ayu puspa arum , yoana marfianti"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/14_A0QSBUnvK.pdf"
+    },
+    {
+      "libraryId": 4,
+      "title": "pengaruh sumber daya manusia terhadap kemampuan kerja pegawi",
+      "subject": ["sumber daya", "kinerja", "pegawai"],
+      "type": "journal",
+      "description": {
+        "penulis": "wahyu widodo"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/15_1Z2rPuSbN.pdf"
+    },
+    {
+      "libraryId": 4,
+      "title": "kualitas sumber daya manusia, profesionalisme kerja, dan komitmen sebagai faktor pendukung peningkatan kinerja karyawan PDAM kabupaten jember",
+      "subject": [
+        "human resource quality",
+        "professionalism of work",
+        "commitment",
+        "performance of employees"
+      ],
+      "type": "journal",
+      "description": {
+        "penulis": "merisa fajar aisyah ,wiji utami, sunardi, sudarsih"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/16_ERyitUqgq.pdf"
+    },
+    {
+      "libraryId": 5,
+      "title": "analisis perbandingan efisiensi penyaluran listrik antara penghantar ACSR dan ACCC pada sistem transmisi 150kV",
+      "subject": ["rugi – rugi daya", "kapasitas konduktor", "rekonduktoring"],
+      "type": "journal",
+      "description": {
+        "penulis": "oktaria handayani, tasdik darmana2, christine widyastuti"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/17_y4-wOVwOc.pdf"
+    },
+    {
+      "libraryId": 5,
+      "title": "analisa tingkat pemahaman dan miskonsepsi pada materi listrik statis mahasisa tadris fisikamenggunaka metode 3-tier multiple choices diagnotic",
+      "subject": [
+        "Miskonsepsi",
+        "Listrik Statis",
+        "3-Tier Multiple Choices Diagnostic"
+      ],
+      "type": "journal",
+      "description": {
+        "penulis": "lalu a. didik , fitratul aulia"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/18_xZ5bVLGkc.pdf"
+    },
+    {
+      "libraryId": 5,
+      "title": "analisa keberlanjutan pengelolaan lingkungan daerah aliran sungai air bengkulu berbasis kemasyarakatan",
+      "subject": [
+        "daerah aliran sungai air bengkulu",
+        "kelembagaan",
+        "mds",
+        "monte charlo",
+        "indeks keberlanjutan"
+      ],
+      "type": "journal",
+      "description": {
+        "penulis": "bursamin, satria putra utama, muhammad faiz barchia"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/19_SCDnhKXfVw.pdf"
+    },
+    {
+      "libraryId": 5,
+      "title": "penerapan e-supply chain management dalam upaya peningkatan produktifitas dan pemasaranproduk pada industri rumah tangga dalam persaingan di era teknologi infrmasi",
+      "subject": [
+        "teknologi informasi",
+        "e-supply chain management",
+        "kerupuk kulit"
+      ],
+      "type": "journal",
+      "description": {
+        "penulis": "afdhal syafnur, khairil anwar1"
+      },
+      "paperUrl": "https://ik.imagekit.io/libsysfo/paper/20_UZXD9wYfL.pdf"
+    }
+  ]
+}

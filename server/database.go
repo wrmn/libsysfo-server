@@ -39,6 +39,7 @@ func testSeedProfile(_ http.ResponseWriter, _ *http.Request) {
 }
 
 func testSeedBook(_ http.ResponseWriter, _ *http.Request) {
+	database.SeedBookLocal()
 	// NOTE: this need API make sure seed it when it needed to be
 	database.SeedBook()
 	database.SeedBookDetail()

@@ -28,7 +28,7 @@ type LibraryCollection struct {
 	Library      LibraryData               `json:"library" gorm:"foreignKey:LibraryID"`
 	BookID       int                       `gorm:"type:int;size:32;autoIncrement:false"`
 	Book         Book                      `json:"book" gorm:"foreignKey:BookID"`
-	Availability int                       `json:"availability" gorm:"not null"`
+	Availability int                       `json:"availability" gorm:"type:int;size:8;not null"`
 	Status       int                       `json:"status" gorm:"type:int;size:32;not null"`
 	Borrow       []LibraryCollectionBorrow `json:"borrowHistory" gorm:"foreignKey:CollectionID"`
 }
@@ -49,10 +49,10 @@ type LibraryCollectionBorrow struct {
 type LibraryPaper struct {
 	gorm.Model
 	ID          int                      `json:"id" gorm:"type:int;primaryKey;size:32"`
-	LibraryID   int                      `gorm:"type:int;size:32;autoIncrement:false"`
+	LibraryID   int                      `json:"libraryId" gorm:"type:int;size:32;autoIncrement:false"`
 	Library     LibraryData              `json:"library" gorm:"foreignKey:LibraryID"`
-	Title       string                   `json:"title" gorm:"type:varchar(128)"`
-	Subject     pq.StringArray           `json:"subject" gorm:"type:varchar(16)[]"`
+	Title       string                   `json:"title" gorm:"type:varchar(256)"`
+	Subject     pq.StringArray           `json:"subject" gorm:"type:varchar(64)[]"`
 	Abstract    string                   `json:"abstract"`
 	Type        string                   `json:"type" gorm:"type:varchar(16)"`
 	Description datatypes.JSON           `json:"description"`

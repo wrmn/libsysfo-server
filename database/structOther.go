@@ -17,3 +17,11 @@ type ThirdPartyJobs struct {
 	ResponseBody string `json:"responseBody" `
 	Status       int    `json:"status" gorm:"type:int;size:32;autoIncrement:false"`
 }
+
+type bookDataset struct {
+	Books []Book `json:"books"`
+}
+
+type paperDataset struct {
+	Papers []LibraryPaper `json:"papers"`
+}

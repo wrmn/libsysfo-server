@@ -266,6 +266,11 @@ func profileInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if data.AccountType != 3 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
+		return
+	}
+
 	permissionData := searchPermission(data.ID)
 	borrowData := searchBorrow(data.ID)
 

@@ -127,7 +127,7 @@ type profilePermissionResponse struct {
 }
 
 type profileCollectionBorrow struct {
-	BorrowId     *int       `json:"id,omitempty"`
+	BorrowId     int        `json:"id,omitempty"`
 	CreatedAt    time.Time  `json:"createdAt"`
 	AcceptedAt   *time.Time `json:"acceptedAt"`
 	TakedAt      *time.Time `json:"takedAt"`
@@ -260,4 +260,11 @@ type bookRequest struct {
 	Publisher   string `json:"publisher"`
 	PageCount   int    `json:"pageCount"`
 	Category    string `json:"category"`
+}
+
+type borrowRequest struct {
+	State        string `json:"state"`
+	BorrowId     *int   `json:"borrowId"`
+	UserId       *int   `json:"userId"`
+	CollectionId *int   `json:"collectionId"`
 }

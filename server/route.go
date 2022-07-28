@@ -35,7 +35,8 @@ func Serve(port string) {
 	r.HandleFunc("/admin/library/collection/{id}/update", libraryUpdateCollection).Methods("POST")
 
 	r.HandleFunc("/admin/library/borrow", libraryBorrow).Methods("GET")
-	r.HandleFunc("/admin/library/borrow/detail", getBorrow).Methods("GET")
+	r.HandleFunc("/admin/library/borrow/find", findBorrow).Methods("GET")
+	r.HandleFunc("/admin/library/borrow/action", actionBorrow).Methods("POST")
 
 	r.HandleFunc("/admin/library/user/find", libraryUserFind).Methods("GET")
 	r.HandleFunc("/admin/library/user/{id}", libraryUser).Methods("GET")

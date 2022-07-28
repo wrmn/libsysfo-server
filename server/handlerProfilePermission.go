@@ -19,6 +19,11 @@ func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if data.AccountType != 3 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
+		return
+	}
+
 	permissionData := searchPermission(data.ID)
 
 	response{
@@ -36,6 +41,11 @@ func profileReadPaper(w http.ResponseWriter, r *http.Request) {
 
 	data, invalid := checkToken(r, w)
 	if invalid {
+		return
+	}
+
+	if data.AccountType != 3 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 	permissionData := database.LibraryPaperPermission{}

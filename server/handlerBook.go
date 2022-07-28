@@ -134,7 +134,7 @@ func singleBook(w http.ResponseWriter, r *http.Request) {
 	result := database.Book{}
 	query := database.DB.Preload("BookDetail").
 		Where("slug = ?", slug).Find(&result)
-	exist, err := checkExist(query)
+	exist, err := database.CheckExist(query)
 	if err != nil {
 		intServerError(w, err)
 		return

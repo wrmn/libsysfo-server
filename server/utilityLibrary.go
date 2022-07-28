@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"libsysfo-server/database"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -48,6 +47,7 @@ func getLibraryBook(libId int, r *http.Request) (bookData []bookResponse, err er
 			PageCount:   d.Book.BookDetail.PageCount,
 			Category:    d.Book.BookDetail.Category,
 			Status: &libraryCollectionResponse{
+				Id:           d.ID,
 				SerialNumber: d.SerialNumber,
 				Availability: d.Availability,
 				Status:       d.Status,
@@ -92,28 +92,6 @@ func setBookResponse(result database.Book) (bookRespBody bookResponse) {
 	bookRespBody.PageCount = int(result.BookDetail.PageCount)
 	bookRespBody.Publisher = result.BookDetail.Publisher
 	bookRespBody.Category = result.BookDetail.Category
-	return
-}
-
-func checkExist(q *gorm.DB) (int64, error) {
-	return q.RowsAffected, q.Error
-}
-
-func slugGenerator(title string) (slug string) {
-	re := regexp.MustCompile(`[^a-zA-Z0-9]`)
-	slug = re.ReplaceAllString(strings.ToLower(title), "-")
-	var exist int64 = 1
-	rep := 0
-	for exist != 0 {
-		query := database.DB.Preload("BookDetail").
-			Where("slug = ?", slug).Find(&database.Book{})
-		exist, _ = checkExist(query)
-		if exist != 0 {
-			rep += 1
-			slug = fmt.Sprintf("%s-%d", slug, rep)
-		}
-	}
-
 	return
 }
 
@@ -210,4 +188,10 @@ func setStatus(d database.LibraryCollectionBorrow) string {
 		return "accepted"
 	}
 	return "requested"
+}
+
+func findCollectionById(collectionId int) (result database.LibraryCollection, err error) {
+	err = database.DB.Where("id = ?", collectionId).Preload("Book.BookDetail").
+		Find((&result)).Error
+	return
 }

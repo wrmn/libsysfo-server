@@ -15,6 +15,11 @@ func profileBorrow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if data.AccountType != 3 {
+		unauthorizedRequest(w, errors.New("user not allowed"))
+		return
+	}
+
 	borrowData := searchBorrow(data.ID)
 
 	response{
@@ -43,6 +48,7 @@ func searchBorrow(id int) []profileCollectionBorrow {
 func appendData(data []database.LibraryCollectionBorrow) (respBody []profileCollectionBorrow) {
 	for _, d := range data {
 		respBody = append(respBody, profileCollectionBorrow{
+			BorrowId:     d.ID,
 			CreatedAt:    d.CreatedAt,
 			AcceptedAt:   d.AcceptedAt,
 			TakedAt:      d.TakedAt,
