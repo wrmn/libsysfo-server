@@ -261,13 +261,8 @@ func googleRegisterHandler(data map[string]interface{}) (err error) {
 }
 
 func profileInformation(w http.ResponseWriter, r *http.Request) {
-	data, invalid := checkToken(r, w)
+	data, invalid := checkIfAllowed(3, w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 3 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 

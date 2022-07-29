@@ -13,28 +13,14 @@ import (
 )
 
 func libraryBorrow(w http.ResponseWriter, r *http.Request) {
-
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 2 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
-		return
-	}
-
-	libOwn := database.LibraryData{}
-
-	err := database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
-	if err != nil {
-		intServerError(w, err)
 		return
 	}
 
 	borrowsData := []profileCollectionBorrow{}
 	collectionsData := []database.LibraryCollection{}
-	err = database.DB.Where("library_id = ?", libOwn.ID).
+	err := database.DB.Where("library_id = ?", libraryData.ID).
 		Preload("Borrow", func(db *gorm.DB) *gorm.DB {
 			return database.DB.
 				Preload("Collection.Library").
@@ -63,20 +49,8 @@ func libraryBorrow(w http.ResponseWriter, r *http.Request) {
 }
 
 func findBorrow(w http.ResponseWriter, r *http.Request) {
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
-		return
-	}
-	if data.AccountType != 2 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
-		return
-	}
-
-	libOwn := database.LibraryData{}
-
-	err := database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
-	if err != nil {
-		intServerError(w, err)
 		return
 	}
 
@@ -100,7 +74,7 @@ func findBorrow(w http.ResponseWriter, r *http.Request) {
 
 	borrowsData := []profileCollectionBorrow{}
 	collectionsData := []database.LibraryCollection{}
-	db := database.DB.Where("library_id = ?", libOwn.ID).
+	db := database.DB.Where("library_id = ?", libraryData.ID).
 		Preload("Borrow", func(db *gorm.DB) *gorm.DB {
 			return database.DB.
 				Preload("Collection.Library").
@@ -156,21 +130,8 @@ func findBorrow(w http.ResponseWriter, r *http.Request) {
 }
 
 func libraryUserBorrow(w http.ResponseWriter, r *http.Request) {
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 2 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
-		return
-	}
-
-	libOwn := database.LibraryData{}
-
-	err := database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
-	if err != nil {
-		intServerError(w, err)
 		return
 	}
 
@@ -195,7 +156,7 @@ func libraryUserBorrow(w http.ResponseWriter, r *http.Request) {
 	respBorrow := []profileCollectionBorrow{}
 
 	for _, i := range borrowData {
-		if i.LibraryId == libOwn.ID {
+		if i.LibraryId == libraryData.ID {
 			respBorrow = append(respBorrow, i)
 		}
 	}
@@ -218,13 +179,8 @@ func libraryUserBorrow(w http.ResponseWriter, r *http.Request) {
 }
 
 func actionBorrow(w http.ResponseWriter, r *http.Request) {
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 2 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 
@@ -254,7 +210,7 @@ func actionBorrow(w http.ResponseWriter, r *http.Request) {
 
 		if db.RowsAffected < 1 ||
 			db.Error != nil ||
-			borrow.Collection.LibraryID != data.Library.ID {
+			borrow.Collection.LibraryID != libraryData.ID {
 			badRequest(w, "borrow Data not found")
 			return
 		}

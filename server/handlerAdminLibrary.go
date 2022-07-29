@@ -30,18 +30,25 @@ func adminInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	libraryData, err := getLibraryData(data.ID)
+	if err != nil {
+		invalid = true
+		badRequest(w, err.Error())
+		return
+	}
+
 	response{
 		Data: responseBody{
 			Profile: adminInformationResponse{
 				Username:      *data.Username,
 				Email:         data.Email,
-				Library:       data.Library.Name,
-				Image:         data.Library.ImagesMain,
-				Address:       data.Library.Address,
-				Coordinate:    data.Library.Coordinate,
-				Description:   data.Library.Description,
-				ContentImages: data.Library.ImagesContent,
-				Webpage:       data.Library.Webpage,
+				Library:       libraryData.Name,
+				Image:         libraryData.ImagesMain,
+				Address:       libraryData.Address,
+				Coordinate:    libraryData.Coordinate,
+				Description:   libraryData.Description,
+				ContentImages: libraryData.ImagesContent,
+				Webpage:       libraryData.Webpage,
 			},
 		},
 		Status:      http.StatusOK,
@@ -51,18 +58,12 @@ func adminInformation(w http.ResponseWriter, r *http.Request) {
 }
 
 func libraryDashboard(w http.ResponseWriter, r *http.Request) {
-
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
 		return
 	}
 
-	if data.AccountType != 2 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
-		return
-	}
-
-	setBody, err := libraryDashboardResponse{}.fill(data.Library.ID, r)
+	setBody, err := libraryDashboardResponse{}.fill(libraryData.ID, r)
 	if err != nil {
 		badRequest(w, "invalid date range")
 	}
@@ -213,37 +214,4 @@ func getBorrowDataset(q datarange) (borrowBody []borrowDataset) {
 		borrowBody = append(borrowBody, borrowResult)
 	}
 	return borrowBody
-}
-
-func libraryUserFind(w http.ResponseWriter, r *http.Request) {
-	_, invalid := checkToken(r, w)
-	if invalid {
-		return
-	}
-
-	result := []profileResponse{}
-	userResult := []database.ProfileAccount{}
-	database.DB.Table("profile_accounts").
-		Scopes(userFindFilter(r)).
-		Preload("ProfileData").
-		Find(&userResult)
-
-	for i, k := range userResult {
-		result = append(result, profileResponse{
-			Id:       &userResult[i].ID,
-			Username: k.Username,
-			Email:    k.Email,
-			Verified: k.ProfileData.VerifiedAt,
-			Name:     k.ProfileData.Name,
-		})
-	}
-
-	response{
-		Data: responseBody{
-			User: result,
-		},
-		Status:      http.StatusOK,
-		Reason:      "Ok",
-		Description: "success",
-	}.responseFormatter(w)
 }

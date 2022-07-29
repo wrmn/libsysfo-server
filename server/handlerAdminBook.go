@@ -13,26 +13,18 @@ import (
 )
 
 func libraryCollections(w http.ResponseWriter, r *http.Request) {
-
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
 		return
 	}
 
-	libOwn := database.LibraryData{}
-
-	err := database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
-	if err != nil {
-		intServerError(w, err)
-		return
-	}
-
 	respBody := []bookResponse{}
-	bookData, err := getLibraryBook(libOwn.ID, r)
+	bookData, err := getLibraryBook(libraryData.ID, r)
 	if err != nil {
 		intServerError(w, err)
 		return
 	}
+
 	response{
 		Data: responseBody{
 			Book: append(respBody, bookData...),
@@ -44,6 +36,11 @@ func libraryCollections(w http.ResponseWriter, r *http.Request) {
 }
 
 func librarySingleCollection(w http.ResponseWriter, r *http.Request) {
+	_, invalid := isLibraryAdmin(w, r)
+	if invalid {
+		return
+	}
+
 	collectionId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		badRequest(w, "invalid id request")
@@ -89,22 +86,8 @@ func librarySingleCollection(w http.ResponseWriter, r *http.Request) {
 }
 
 func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
-
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 2 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
-		return
-	}
-
-	libOwn := database.LibraryData{}
-
-	err := database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
-	if err != nil {
-		intServerError(w, err)
 		return
 	}
 
@@ -112,7 +95,7 @@ func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
 	var unmarshalErr *json.UnmarshalTypeError
 
 	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&e)
+	err := decoder.Decode(&e)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {
 			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
@@ -218,7 +201,7 @@ func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
 	for _, k := range e.Collection {
 		err = database.DB.Create(&database.LibraryCollection{
 			SerialNumber: k.SerialNumber,
-			LibraryID:    libOwn.ID,
+			LibraryID:    libraryData.ID,
 			BookID:       result.ID,
 			Availability: k.Availability,
 			Status:       1,
@@ -238,13 +221,8 @@ func libraryAddCollection(w http.ResponseWriter, r *http.Request) {
 
 func libraryUpdateCollection(w http.ResponseWriter, r *http.Request) {
 	collectionId := mux.Vars(r)["id"]
-	data, invalid := checkToken(r, w)
+	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 2 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 
@@ -273,15 +251,7 @@ func libraryUpdateCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	libOwn := database.LibraryData{}
-
-	err = database.DB.Where("user_id = ?", data.ID).Find(&libOwn).Error
-	if err != nil {
-		intServerError(w, err)
-		return
-	}
-
-	if libOwn.ID != resultCollection.LibraryID {
+	if libraryData.ID != resultCollection.LibraryID {
 		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}

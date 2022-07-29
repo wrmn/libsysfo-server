@@ -96,6 +96,7 @@ type paperResponse struct {
 	Type        string         `json:"type"`
 	Description datatypes.JSON `json:"description"`
 	Access      bool           `json:"access"`
+	PaperUrl    *string        `json:"paperUrl"`
 }
 
 type profileResponse struct {
@@ -268,4 +269,18 @@ type borrowRequest struct {
 	BorrowId     *int   `json:"borrowId"`
 	UserId       *int   `json:"userId"`
 	CollectionId *int   `json:"collectionId"`
+}
+
+type paperAddRequest struct {
+	Title       string         `json:"title"`
+	Subject     pq.StringArray `json:"subject"`
+	Abstract    string         `json:"abstract"`
+	Type        string         `json:"type"`
+	Description datatypes.JSON `json:"description"`
+	Access      *bool          `json:"access"`
+	PaperFile   []byte         `json:"paperFile"`
+}
+
+type fileUpdateRequest struct {
+	File []byte `json:"file"`
 }

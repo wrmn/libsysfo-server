@@ -19,7 +19,6 @@ func getLibraryBook(libId int, r *http.Request) (bookData []bookResponse, err er
 	if q.Has("sn") {
 		sn := fmt.Sprintf("%%%s%%", strings.ToLower(q.Get("sn")))
 		db = database.DB.Where("library_id = ? AND LOWER(serial_number) LIKE ?", libId, sn)
-
 	} else {
 		db = database.DB.Where("library_id = ?", libId)
 	}
@@ -80,20 +79,33 @@ func getLibraryPaper(libId int) (paperData []paperResponse, err error) {
 	return
 }
 
-func setBookResponse(result database.Book) (bookRespBody bookResponse) {
-	bookRespBody.Title = result.Title
-	bookRespBody.Image = result.Image
-	bookRespBody.Author = result.Author
-	bookRespBody.Slug = result.Slug
-	bookRespBody.Source = result.Source
-	bookRespBody.ReleaseDate = result.BookDetail.ReleaseDate
-	bookRespBody.Description = result.BookDetail.Description
-	bookRespBody.Language = result.BookDetail.Language
-	bookRespBody.Country = result.BookDetail.Country
-	bookRespBody.PageCount = int(result.BookDetail.PageCount)
-	bookRespBody.Publisher = result.BookDetail.Publisher
-	bookRespBody.Category = result.BookDetail.Category
-	return
+func setBookResponse(result database.Book) bookResponse {
+	return bookResponse{
+		Title:       result.Title,
+		Image:       result.Image,
+		Author:      result.Author,
+		Slug:        result.Slug,
+		Source:      result.Source,
+		ReleaseDate: result.BookDetail.ReleaseDate,
+		Description: result.BookDetail.Description,
+		Language:    result.BookDetail.Language,
+		Country:     result.BookDetail.Country,
+		PageCount:   int(result.BookDetail.PageCount),
+		Publisher:   result.BookDetail.Publisher,
+		Category:    result.BookDetail.Category,
+	}
+}
+
+func setPaperResponse(result database.LibraryPaper) paperResponse {
+	return paperResponse{
+		Id:          result.ID,
+		Title:       result.Title,
+		Subject:     result.Subject,
+		Abstract:    result.Abstract,
+		Type:        result.Type,
+		Description: result.Description,
+		Access:      result.Access,
+	}
 }
 
 func paginator(r *http.Request, limit int) func(db *gorm.DB) *gorm.DB {

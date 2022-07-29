@@ -38,6 +38,14 @@ func Serve(port string) {
 	r.HandleFunc("/admin/library/borrow/find", findBorrow).Methods("GET")
 	r.HandleFunc("/admin/library/borrow/action", actionBorrow).Methods("POST")
 
+	r.HandleFunc("/admin/library/paper", libraryPaper).Methods("GET")
+	r.HandleFunc("/admin/library/paper/new", libraryAddPaper).Methods("POST")
+	r.HandleFunc("/admin/library/paper/{id}", librarySinglePaper).Methods("GET")
+	r.HandleFunc("/admin/library/paper/{id}/update", libraryUpdatePaper).Methods("POST")
+	r.HandleFunc("/admin/library/paper/{id}/update/file", libraryUpdatePaperFile).Methods("POST")
+
+	r.HandleFunc("/admin/library/permission", libraryPermission).Methods("GET")
+
 	r.HandleFunc("/admin/library/user/find", libraryUserFind).Methods("GET")
 	r.HandleFunc("/admin/library/user/{id}", libraryUser).Methods("GET")
 	r.HandleFunc("/admin/library/user/{id}/borrow", libraryUserBorrow).Methods("GET")

@@ -10,13 +10,8 @@ import (
 )
 
 func profileBorrow(w http.ResponseWriter, r *http.Request) {
-	data, invalid := checkToken(r, w)
+	data, invalid := checkIfAllowed(3, w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 3 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 
@@ -104,13 +99,19 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	collectionData := database.LibraryCollection{}
-	statsCollection := database.DB.
-		Where("id = ? AND availability = ?", e.Id, 1).
+	err = database.DB.
+		Where("id = ? ", e.Id).
 		Find(&collectionData).
-		RowsAffected
+		Error
+	if err != nil {
+		intServerError(w, err)
+	}
 
-	if statsCollection == 0 {
+	if collectionData.Availability == 3 {
 		badRequest(w, "Book is not available")
+		return
+	} else if collectionData.Availability == 2 {
+		badRequest(w, "Book only available for read on library")
 		return
 	}
 

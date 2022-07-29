@@ -14,13 +14,8 @@ import (
 )
 
 func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
-	data, invalid := checkToken(r, w)
+	data, invalid := checkIfAllowed(3, w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 3 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 
@@ -39,13 +34,8 @@ func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
 func profileReadPaper(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	data, invalid := checkToken(r, w)
+	data, invalid := checkIfAllowed(3, w, r)
 	if invalid {
-		return
-	}
-
-	if data.AccountType != 3 {
-		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
 

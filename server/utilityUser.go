@@ -57,7 +57,7 @@ func checkToken(r *http.Request, w http.ResponseWriter) (database.ProfileAccount
 func userData(tokenData *jwt.Token) (data database.ProfileAccount, err error) {
 	cred := tokenData.Claims.(*cred.TokenModel)
 	db := database.DB.Where("email = ?", cred.Email).Or("username = ?", cred.Username).
-		Preload("Library").Preload("ProfileData").First(&data)
+		Preload("ProfileData").First(&data)
 	if db.RowsAffected != 1 {
 		return data, errors.New("user not found")
 	}
@@ -188,4 +188,45 @@ func generateProfileResponse(data database.ProfileAccount) profileResponse {
 		IsWhatsapp:   &data.ProfileData.IsWhatsapp,
 		Images:       data.ProfileData.Images,
 	}
+}
+
+func getLibraryData(userId int) (data database.LibraryData, err error) {
+	db := database.DB.Where("user_id = ?", userId).Find(&data)
+	if db.RowsAffected < 1 {
+		err = errors.New("user not have any library")
+		return
+	} else {
+		err = db.Error
+	}
+	return
+}
+
+func isLibraryAdmin(w http.ResponseWriter, r *http.Request) (libraryData database.LibraryData, invalid bool) {
+	data, invalid := checkIfAllowed(2, w, r)
+	if invalid {
+		return
+	}
+
+	libraryData, err := getLibraryData(data.ID)
+	if err != nil {
+		invalid = true
+		badRequest(w, err.Error())
+		return
+	}
+
+	return
+}
+
+func checkIfAllowed(accType int, w http.ResponseWriter, r *http.Request) (data database.ProfileAccount, invalid bool) {
+	data, invalid = checkToken(r, w)
+	if invalid {
+		return
+	}
+
+	if data.AccountType != accType {
+		invalid = true
+		unauthorizedRequest(w, errors.New("user not allowed"))
+		return
+	}
+	return
 }
