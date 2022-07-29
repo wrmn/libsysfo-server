@@ -48,6 +48,7 @@ func profileReadPaper(w http.ResponseWriter, r *http.Request) {
 		unauthorizedRequest(w, errors.New("user not allowed"))
 		return
 	}
+
 	permissionData := database.LibraryPaperPermission{}
 	row := database.DB.
 		Where("id = ? AND user_id = ?", id, data.ID).

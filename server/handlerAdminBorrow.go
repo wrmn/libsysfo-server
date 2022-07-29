@@ -297,6 +297,12 @@ func actionBorrow(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		err = cancelOtherBorrow(newBorrow)
+		if err != nil {
+			intServerError(w, err)
+			return
+		}
+
 		collectionData.Availability = 3
 		err = database.DB.Save(&collectionData).Error
 		if err != nil {
@@ -327,6 +333,11 @@ func borrowNextAction(w http.ResponseWriter, e borrowRequest) {
 
 	if e.State == "next" {
 		if borrowData.AcceptedAt == nil {
+			err := cancelOtherBorrow(borrowData)
+			if err != nil {
+				intServerError(w, err)
+				return
+			}
 			borrowData.AcceptedAt = &now
 			borrowData.Collection.Availability = 3
 		} else if borrowData.TakedAt == nil {
@@ -350,6 +361,12 @@ func borrowNextAction(w http.ResponseWriter, e borrowRequest) {
 	}
 
 	err := database.DB.Save(&borrowData).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	err = database.DB.Save(&borrowData.Collection).Error
 	if err != nil {
 		intServerError(w, err)
 		return

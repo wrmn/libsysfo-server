@@ -15,17 +15,18 @@ type response struct {
 }
 
 type responseBody struct {
-	Profile    interface{} `json:"profile,omitempty"`
-	Library    interface{} `json:"library,omitempty"`
-	Book       interface{} `json:"book,omitempty"`
-	Collection interface{} `json:"collection,omitempty"`
-	Paper      interface{} `json:"paper,omitempty"`
-	Borrow     interface{} `json:"borrow,omitempty"`
-	Permission interface{} `json:"permission,omitempty"`
-	Dataset    interface{} `json:"dataset,omitempty"`
-	User       interface{} `json:"user,omitempty"`
-	Token      string      `json:"token,omitempty"`
-	Paginate   *paginate   `json:"paginate,omitempty"`
+	Profile               interface{} `json:"profile,omitempty"`
+	Library               interface{} `json:"library,omitempty"`
+	Book                  interface{} `json:"book,omitempty"`
+	Collection            interface{} `json:"collection,omitempty"`
+	AlternativeCollection interface{} `json:"alternativeCollection,omitempty"`
+	Paper                 interface{} `json:"paper,omitempty"`
+	Borrow                interface{} `json:"borrow,omitempty"`
+	Permission            interface{} `json:"permission,omitempty"`
+	Dataset               interface{} `json:"dataset,omitempty"`
+	User                  interface{} `json:"user,omitempty"`
+	Token                 string      `json:"token,omitempty"`
+	Paginate              *paginate   `json:"paginate,omitempty"`
 }
 
 type paginate struct {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -192,6 +193,37 @@ func setStatus(d database.LibraryCollectionBorrow) string {
 
 func findCollectionById(collectionId int) (result database.LibraryCollection, err error) {
 	err = database.DB.Where("id = ?", collectionId).Preload("Book.BookDetail").
+		Preload("Borrow.Collection.Book").
+		Preload("Borrow.User.ProfileData").
 		Find((&result)).Error
 	return
+}
+
+func cancelOtherBorrow(currentData database.LibraryCollectionBorrow) (err error) {
+	data := []database.LibraryCollectionBorrow{}
+	err = database.DB.
+		Where("NOT id = ? AND collection_id = ? AND returned_at IS NULL",
+			currentData.ID,
+			currentData.CollectionID,
+		).
+		Find(&data).
+		Error
+	now := time.Now()
+
+	for i := range data {
+		data[i].CanceledAt = &now
+		database.DB.Save(&data[i])
+	}
+
+	return
+}
+
+func generateCollectionResponse(data database.LibraryCollection) libraryCollectionResponse {
+	return libraryCollectionResponse{
+		Id:           data.ID,
+		SerialNumber: data.SerialNumber,
+		Availability: data.Availability,
+		Status:       data.Status,
+	}
+
 }

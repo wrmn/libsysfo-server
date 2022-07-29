@@ -102,8 +102,8 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, "Please verify your email address and fill all profile information")
 		return
 	}
-	collectionData := database.LibraryCollection{}
 
+	collectionData := database.LibraryCollection{}
 	statsCollection := database.DB.
 		Where("id = ? AND availability = ?", e.Id, 1).
 		Find(&collectionData).
@@ -114,18 +114,10 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collectionData.Availability = 3
-
 	borrowData := database.LibraryCollectionBorrow{
 		UserID:       user.ID,
 		CollectionID: e.Id,
 		CreatedAt:    time.Now(),
-	}
-	err = database.DB.Save(&collectionData).Error
-
-	if err != nil {
-		intServerError(w, err)
-		return
 	}
 
 	err = database.DB.Save(&borrowData).Error

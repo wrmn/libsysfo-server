@@ -54,15 +54,33 @@ func librarySingleCollection(w http.ResponseWriter, r *http.Request) {
 		intServerError(w, err)
 	}
 
+	borrowData := appendData(resultCollection.Borrow)
+
+	altCollection := []database.LibraryCollection{}
+	err = database.DB.
+		Where("NOT id = ? AND book_id = ? AND library_id = ?",
+			resultCollection.ID,
+			resultCollection.BookID,
+			resultCollection.LibraryID,
+		).Find(&altCollection).Error
+
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	resultAltCollection := []libraryCollectionResponse{}
+	for i := range altCollection {
+		resultAltCollection = append(resultAltCollection,
+			generateCollectionResponse(altCollection[i]))
+	}
+
 	response{
 		Data: responseBody{
-			Book: setBookResponse(resultCollection.Book),
-			Collection: libraryCollectionResponse{
-				Id:           resultCollection.ID,
-				SerialNumber: resultCollection.SerialNumber,
-				Availability: resultCollection.Availability,
-				Status:       resultCollection.Status,
-			},
+			Book:                  setBookResponse(resultCollection.Book),
+			Collection:            generateCollectionResponse(resultCollection),
+			AlternativeCollection: &resultAltCollection,
+			Borrow:                &borrowData,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
