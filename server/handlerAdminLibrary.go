@@ -30,10 +30,8 @@ func adminInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	libraryData, err := getLibraryData(data.ID)
-	if err != nil {
-		invalid = true
-		badRequest(w, err.Error())
+	libraryData, invalid := getLibraryData(data.ID, w)
+	if invalid {
 		return
 	}
 

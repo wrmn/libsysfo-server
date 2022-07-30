@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"time"
 
@@ -30,31 +31,47 @@ func InitDatabase() (err error) {
 }
 
 func Checker() {
+	var err error
 	for {
 		time.Sleep(60 * time.Minute)
+		now := time.Now()
+
 		dataBorrow := []LibraryCollectionBorrow{}
-		DB.Find(&dataBorrow)
+		dataAccess := []LibraryPaperPermission{}
+
+		err = DB.Find(&dataAccess).Error
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
 		for _, d := range dataBorrow {
-			var diff time.Duration
-			if d.AcceptedAt == nil {
-				diff = time.Since(d.CreatedAt)
-			} else {
-				diff = time.Since(*d.AcceptedAt)
-			}
-			if diff.Hours() >= 48 && d.TakedAt == nil {
-				now := time.Now()
-				d.CanceledAt = &now
-				DB.Save(&d)
+			if d.TakedAt == nil {
+				var diff time.Duration
+				if d.AcceptedAt == nil {
+					diff = time.Since(d.CreatedAt)
+				} else {
+					diff = time.Since(*d.AcceptedAt)
+				}
+				if diff.Hours() >= 48 {
+					d.CanceledAt = &now
+					DB.Save(&d)
+				}
 			}
 		}
-		dataAccess := []LibraryPaperPermission{}
-		DB.Find(&dataAccess)
-		stats := false
+
+		err = DB.Find(&dataBorrow).Error
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
+
 		for _, d := range dataAccess {
-			diff := time.Since(d.CreatedAt)
-			if diff.Hours() <= 48 && d.Accepted == nil {
-				d.Accepted = &stats
-				DB.Save(&d)
+			if d.AcceptedAt == nil && d.CanceledAt == nil {
+				diff := time.Since(d.CreatedAt)
+				if diff.Hours() <= 48 {
+					d.CanceledAt = &now
+					DB.Save(&d)
+				}
 			}
 		}
 	}

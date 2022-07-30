@@ -45,6 +45,9 @@ func Serve(port string) {
 	r.HandleFunc("/admin/library/paper/{id}/update/file", libraryUpdatePaperFile).Methods("POST")
 
 	r.HandleFunc("/admin/library/permission", libraryPermission).Methods("GET")
+	r.HandleFunc("/admin/library/permission/find", findPermission).Methods("GET")
+	r.HandleFunc("/admin/library/permission/{id}/action", actionPermission).Methods("POST")
+	r.HandleFunc("/admin/library/permission/{id}/access", accessHistory).Methods("GET")
 
 	r.HandleFunc("/admin/library/user/find", libraryUserFind).Methods("GET")
 	r.HandleFunc("/admin/library/user/{id}", libraryUser).Methods("GET")

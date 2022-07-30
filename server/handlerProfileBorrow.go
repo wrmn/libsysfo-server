@@ -27,7 +27,7 @@ func profileBorrow(w http.ResponseWriter, r *http.Request) {
 	}.responseFormatter(w)
 }
 
-func searchBorrow(id int) []profileCollectionBorrow {
+func searchBorrow(id int) []profileCollectionBorrowResponse {
 
 	data := []database.LibraryCollectionBorrow{}
 	database.DB.Where("user_id = ?", id).
@@ -37,30 +37,7 @@ func searchBorrow(id int) []profileCollectionBorrow {
 		Order("created_at desc").
 		Find(&data)
 
-	return appendData(data)
-}
-
-func appendData(data []database.LibraryCollectionBorrow) (respBody []profileCollectionBorrow) {
-	for _, d := range data {
-		respBody = append(respBody, profileCollectionBorrow{
-			BorrowId:     d.ID,
-			CreatedAt:    d.CreatedAt,
-			AcceptedAt:   d.AcceptedAt,
-			TakedAt:      d.TakedAt,
-			ReturnedAt:   d.ReturnedAt,
-			CanceledAt:   d.CanceledAt,
-			Title:        d.Collection.Book.Title,
-			SerialNumber: d.Collection.SerialNumber,
-			CollectionId: d.Collection.ID,
-			Slug:         d.Collection.Book.Slug,
-			LibraryId:    d.Collection.LibraryID,
-			Library:      d.Collection.Library.Name,
-			UserId:       d.User.ID,
-			UserName:     d.User.ProfileData.Name,
-			Status:       setStatus(d),
-		})
-	}
-	return
+	return appendBorrowData(data)
 }
 
 func borrowNewBook(w http.ResponseWriter, r *http.Request) {

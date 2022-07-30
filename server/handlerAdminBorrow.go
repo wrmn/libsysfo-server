@@ -18,7 +18,7 @@ func libraryBorrow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	borrowsData := []profileCollectionBorrow{}
+	borrowsData := []profileCollectionBorrowResponse{}
 	collectionsData := []database.LibraryCollection{}
 	err := database.DB.Where("library_id = ?", libraryData.ID).
 		Preload("Borrow", func(db *gorm.DB) *gorm.DB {
@@ -35,7 +35,7 @@ func libraryBorrow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, k := range collectionsData {
-		borrowsData = append(borrowsData, appendData(k.Borrow)...)
+		borrowsData = append(borrowsData, appendBorrowData(k.Borrow)...)
 	}
 
 	response{
@@ -72,42 +72,35 @@ func findBorrow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	borrowsData := []profileCollectionBorrow{}
-	collectionsData := []database.LibraryCollection{}
-	db := database.DB.Where("library_id = ?", libraryData.ID).
+	borrowsData := []profileCollectionBorrowResponse{}
+	collectionData := database.LibraryCollection{}
+	db := database.DB.
+		Where("library_id = ? AND id = ?", libraryData.ID, cid).
 		Preload("Borrow", func(db *gorm.DB) *gorm.DB {
 			return database.DB.
 				Preload("Collection.Library").
 				Preload("Collection.Book").
-				Preload("User.ProfileData")
+				Preload("User.ProfileData").
+				Where("user_id = ? ", uid)
 		}).
-		Find(&collectionsData)
+		Find(&collectionData)
 
-	if db.RowsAffected < 1 {
-		return
-	}
-	if db.Error != nil {
-		intServerError(w, db.Error)
+	if invalid := databaseException(w, db); invalid {
 		return
 	}
 
-	for _, k := range collectionsData {
-		for _, l := range k.Borrow {
-			if l.UserID == uid && l.CollectionID == cid {
-				borrowsData = append(borrowsData, appendData([]database.LibraryCollectionBorrow{l})...)
-			}
-		}
+	for _, l := range collectionData.Borrow {
+		borrowsData = append(borrowsData, appendBorrowData([]database.LibraryCollectionBorrow{l})...)
 	}
 
-	userData, err := findUserById(uid)
-	if err != nil {
-		badRequest(w, err.Error())
+	userData, invalid := findUserById(uid, w)
+	if invalid {
 		return
 	}
 
-	resultCollection, err := findCollectionById(cid)
-	if err != nil {
-		intServerError(w, err)
+	resultCollection, invalid := findCollectionById(cid, w)
+	if invalid {
+		return
 	}
 
 	response{
@@ -152,8 +145,8 @@ func libraryUserBorrow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	borrowData := appendData(userResult.Borrow)
-	respBorrow := []profileCollectionBorrow{}
+	borrowData := appendBorrowData(userResult.Borrow)
+	respBorrow := []profileCollectionBorrowResponse{}
 
 	for _, i := range borrowData {
 		if i.LibraryId == libraryData.ID {
@@ -197,8 +190,9 @@ func actionBorrow(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var borrow database.LibraryCollectionBorrow
+
 	if e.State == "next" || e.State == "cancel" {
+		var borrow database.LibraryCollectionBorrow
 		if e.BorrowId == nil {
 			badRequest(w, "borrow Id required")
 			return
@@ -207,10 +201,11 @@ func actionBorrow(w http.ResponseWriter, r *http.Request) {
 		db := database.DB.Where("id = ?", *e.BorrowId).
 			Preload("Collection").
 			Find(&borrow)
+		if invalid := databaseException(w, db); invalid {
+			return
+		}
 
-		if db.RowsAffected < 1 ||
-			db.Error != nil ||
-			borrow.Collection.LibraryID != libraryData.ID {
+		if borrow.Collection.LibraryID != libraryData.ID {
 			badRequest(w, "borrow Data not found")
 			return
 		}
@@ -218,64 +213,67 @@ func actionBorrow(w http.ResponseWriter, r *http.Request) {
 		borrowNextAction(w, e)
 
 	} else if e.State == "new" || e.State == "newTake" {
-
-		if e.CollectionId == nil || e.UserId == nil {
-			badRequest(w, "incomplete request, select user and collection corectly")
-			return
-		}
-
-		collectionData := database.LibraryCollection{}
-		err := database.DB.Where("id = ?", e.CollectionId).Find(&collectionData).Error
-		if err != nil {
-			badRequest(w, err.Error())
-			return
-		}
-
-		newBorrow := database.LibraryCollectionBorrow{
-			CreatedAt:    time.Now(),
-			CollectionID: *e.CollectionId,
-			UserID:       *e.UserId,
-		}
-		newBorrow.AcceptedAt = &newBorrow.CreatedAt
-
-		if e.State == "newTake" {
-			newBorrow.TakedAt = &newBorrow.CreatedAt
-		}
-
-		if collectionData.Availability != 1 {
-			badRequest(w, "Book is not available to borrow")
-			return
-		}
-
-		err = database.DB.Create(&newBorrow).Error
-		if err != nil {
-			intServerError(w, err)
-			return
-		}
-
-		err = cancelOtherBorrow(newBorrow)
-		if err != nil {
-			intServerError(w, err)
-			return
-		}
-
-		collectionData.Availability = 3
-		err = database.DB.Save(&collectionData).Error
-		if err != nil {
-			intServerError(w, err)
-			return
-		}
-
-		response{
-			Status:      http.StatusOK,
-			Reason:      "Ok",
-			Description: "New Borrow created",
-		}.responseFormatter(w)
-
+		borrowNewAction(w, e, libraryData.ID)
 	} else {
 		badRequest(w, "invalid state. use new, newTake, next, or cancel as state.")
+	}
+}
+
+func borrowNewAction(w http.ResponseWriter, e borrowRequest, libraryId int) {
+	if e.CollectionId == nil || e.UserId == nil {
+		badRequest(w, "incomplete request, select user and collection corectly")
 		return
 	}
+
+	collectionData := database.LibraryCollection{}
+	db := database.DB.Where("id = ?", e.CollectionId).Find(&collectionData)
+	if invalid := databaseException(w, db); invalid {
+		return
+	}
+	if collectionData.LibraryID != libraryId {
+		badRequest(w, "borrow Data not found")
+		return
+	}
+	newBorrow := database.LibraryCollectionBorrow{
+		CreatedAt:    time.Now(),
+		CollectionID: *e.CollectionId,
+		UserID:       *e.UserId,
+	}
+	newBorrow.AcceptedAt = &newBorrow.CreatedAt
+
+	if e.State == "newTake" {
+		newBorrow.TakedAt = &newBorrow.CreatedAt
+	}
+
+	if collectionData.Availability != 1 {
+		badRequest(w, "Book is not available to borrow")
+		return
+	}
+
+	err := database.DB.Create(&newBorrow).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	err = cancelOtherBorrow(newBorrow)
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	collectionData.Availability = 3
+	err = database.DB.Save(&collectionData).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	response{
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "New Borrow created",
+	}.responseFormatter(w)
 }
 
 func borrowNextAction(w http.ResponseWriter, e borrowRequest) {

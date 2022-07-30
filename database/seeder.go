@@ -399,14 +399,19 @@ func SeedLibraryPaperPermission() {
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 200; i++ {
-		acc := (rand.Intn(2) == 0)
 		paperId := rand.Intn(80) + 1
-		data = append(data, LibraryPaperPermission{
-			PaperID:  paperId,
-			UserID:   rand.Intn(23) + 8,
-			Purpose:  gofakeit.LoremIpsumSentence(10),
-			Accepted: &acc,
-		})
+		singleData := LibraryPaperPermission{
+			PaperID: paperId,
+			UserID:  rand.Intn(23) + 8,
+			Purpose: gofakeit.LoremIpsumSentence(10),
+		}
+		if rand.Intn(2) == 0 {
+			singleData.AcceptedAt = &currentTime
+		} else {
+			singleData.CanceledAt = &currentTime
+		}
+		data = append(data, singleData)
+
 	}
 	DB.Create(&data)
 }

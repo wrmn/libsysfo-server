@@ -44,14 +44,15 @@ func librarySingleCollection(w http.ResponseWriter, r *http.Request) {
 	collectionId, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		badRequest(w, "invalid id request")
+		return
 	}
 
-	resultCollection, err := findCollectionById(collectionId)
-	if err != nil {
-		intServerError(w, err)
+	resultCollection, invalid := findCollectionById(collectionId, w)
+	if invalid {
+		return
 	}
 
-	borrowData := appendData(resultCollection.Borrow)
+	borrowData := appendBorrowData(resultCollection.Borrow)
 
 	altCollection := []database.LibraryCollection{}
 	err = database.DB.

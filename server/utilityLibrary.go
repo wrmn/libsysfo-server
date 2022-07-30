@@ -108,6 +108,60 @@ func setPaperResponse(result database.LibraryPaper) paperResponse {
 	}
 }
 
+func appendBorrowData(data []database.LibraryCollectionBorrow) (respBody []profileCollectionBorrowResponse) {
+	for _, d := range data {
+		respBody = append(respBody, formatBorrowData(d))
+	}
+	return
+}
+
+func appendPermissionData(data []database.LibraryPaperPermission) (respBody []profilePermissionResponse) {
+	for _, j := range data {
+		respBody = append(respBody, formatPermissionData(j))
+	}
+	return
+}
+
+func formatBorrowData(d database.LibraryCollectionBorrow) profileCollectionBorrowResponse {
+	return profileCollectionBorrowResponse{
+		BorrowId:     d.ID,
+		CreatedAt:    d.CreatedAt,
+		AcceptedAt:   d.AcceptedAt,
+		TakedAt:      d.TakedAt,
+		ReturnedAt:   d.ReturnedAt,
+		CanceledAt:   d.CanceledAt,
+		Title:        d.Collection.Book.Title,
+		SerialNumber: d.Collection.SerialNumber,
+		CollectionId: d.Collection.ID,
+		Slug:         d.Collection.Book.Slug,
+		LibraryId:    d.Collection.LibraryID,
+		Library:      d.Collection.Library.Name,
+		UserId:       d.User.ID,
+		UserName:     d.User.ProfileData.Name,
+		Status:       setStatus(d),
+	}
+}
+
+func formatPermissionData(j database.LibraryPaperPermission) profilePermissionResponse {
+	return profilePermissionResponse{
+		CreatedAt:    j.CreatedAt,
+		AcceptedAt:   j.AcceptedAt,
+		Id:           j.ID,
+		PaperTitle:   j.Paper.Title,
+		PaperSubject: j.Paper.Subject,
+		PaperType:    j.Paper.Type,
+		Library:      j.Paper.Library.Name,
+		Purpose:      j.Purpose,
+	}
+}
+
+func appendAccessData(data []database.LibraryPaperAccess) (resp []time.Time) {
+	for _, k := range data {
+		resp = append(resp, k.CreatedAt)
+	}
+	return
+}
+
 func paginator(r *http.Request, limit int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		q := r.URL.Query()
@@ -203,11 +257,13 @@ func setStatus(d database.LibraryCollectionBorrow) string {
 	return "requested"
 }
 
-func findCollectionById(collectionId int) (result database.LibraryCollection, err error) {
-	err = database.DB.Where("id = ?", collectionId).Preload("Book.BookDetail").
+func findCollectionById(collectionId int, w http.ResponseWriter) (result database.LibraryCollection, invalid bool) {
+	db := database.DB.Where("id = ?", collectionId).Preload("Book.BookDetail").
 		Preload("Borrow.Collection.Book").
 		Preload("Borrow.User.ProfileData").
-		Find((&result)).Error
+		Find((&result))
+
+	invalid = databaseException(w, db)
 	return
 }
 

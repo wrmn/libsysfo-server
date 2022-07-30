@@ -19,7 +19,11 @@ func profileAccessPermission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionData := searchPermission(data.ID)
+	permissionData, err := searchPermission(data.ID)
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
 
 	response{
 		Data: responseBody{
@@ -40,12 +44,11 @@ func profileReadPaper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	permissionData := database.LibraryPaperPermission{}
-	row := database.DB.
+	db := database.DB.
 		Where("id = ? AND user_id = ?", id, data.ID).
-		Preload("Paper").Find(&permissionData).RowsAffected
+		Preload("Paper").Find(&permissionData)
 
-	if row == 0 {
-		badRequest(w, "data not found")
+	if invalid := databaseException(w, db); invalid {
 		return
 	}
 
@@ -71,23 +74,16 @@ func profileReadPaper(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func searchPermission(id int) (respBody []profilePermissionResponse) {
+func searchPermission(id int) (respBody []profilePermissionResponse, err error) {
 	data := []database.LibraryPaperPermission{}
-	database.DB.Where("user_id = ?", id).
-		Preload("Paper.Library").Find(&data)
-
-	for _, d := range data {
-		respBody = append(respBody, profilePermissionResponse{
-			CreatedAt:    d.CreatedAt,
-			Id:           d.ID,
-			PaperTitle:   d.Paper.Title,
-			PaperSubject: d.Paper.Subject,
-			PaperType:    d.Paper.Type,
-			Library:      d.Paper.Library.Name,
-			Purpose:      d.Purpose,
-			Accepted:     d.Accepted,
-		})
+	err = database.DB.Where("user_id = ?", id).
+		Preload("Paper.Library").Find(&data).Error
+	if err != nil {
+		return
 	}
+
+	respBody = appendPermissionData(data)
+
 	return
 }
 
@@ -135,7 +131,7 @@ func profileNewPermission(w http.ResponseWriter, r *http.Request) {
 	}
 
 	statsPermission := database.DB.
-		Where("paper_id = ? AND user_id = ?", e.Id, user.ID).
+		Where("paper_id = ? AND user_id = ? AND accepted_at IS NOT NULL", e.Id, user.ID).
 		Find(&database.LibraryPaperPermission{}).RowsAffected
 
 	if statsPermission != 0 {

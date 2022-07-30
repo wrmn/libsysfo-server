@@ -20,9 +20,8 @@ func libraryUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userData, err := findUserById(id)
-	if err != nil {
-		badRequest(w, err.Error())
+	userData, invalid := findUserById(id, w)
+	if invalid {
 		return
 	}
 

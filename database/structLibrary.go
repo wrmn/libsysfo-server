@@ -63,13 +63,15 @@ type LibraryPaper struct {
 
 type LibraryPaperPermission struct {
 	gorm.Model
-	ID       int            `gorm:"type:int;primaryKey;size:32"`
-	PaperID  int            `gorm:"type:int;size:32;autoIncrement:false"`
-	Paper    LibraryPaper   `json:"paper" gorm:"foreignKey:PaperID"`
-	UserID   int            `gorm:"type:int;size:32;autoIncrement:false"`
-	User     ProfileAccount `json:"user" gorm:"foreignKey:UserID"`
-	Purpose  string         `json:"purpose" gorm:"type:varchar(128)"`
-	Accepted *bool          `json:"access"`
+	ID         int                  `gorm:"type:int;primaryKey;size:32"`
+	AcceptedAt *time.Time           `json:"acceptedAt" gorm:"type:timestamp with time zone"`
+	CanceledAt *time.Time           `json:"canceledAt" gorm:"type:timestamp with time zone"`
+	PaperID    int                  `gorm:"type:int;size:32;autoIncrement:false"`
+	Paper      LibraryPaper         `json:"paper" gorm:"foreignKey:PaperID"`
+	UserID     int                  `gorm:"type:int;size:32;autoIncrement:false"`
+	User       ProfileAccount       `json:"user" gorm:"foreignKey:UserID"`
+	Purpose    string               `json:"purpose" gorm:"type:varchar(128)"`
+	Access     []LibraryPaperAccess `json:"access" gorm:"foreignKey:PermissionID"`
 }
 
 type LibraryPaperAccess struct {

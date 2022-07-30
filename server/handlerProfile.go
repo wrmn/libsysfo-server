@@ -266,7 +266,11 @@ func profileInformation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	permissionData := searchPermission(data.ID)
+	permissionData, err := searchPermission(data.ID)
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
 	borrowData := searchBorrow(data.ID)
 
 	response{

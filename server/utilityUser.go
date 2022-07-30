@@ -89,18 +89,12 @@ func pwdLocator(r *http.Request) (pwd string, err error) {
 	return
 }
 
-func findUserById(id int) (data database.ProfileAccount, err error) {
-	result := database.DB.
+func findUserById(id int, w http.ResponseWriter) (data database.ProfileAccount, invalid bool) {
+	db := database.DB.
 		Where("id = ?", id).
 		Preload("ProfileData").
 		Find(&data)
-
-	if result.RowsAffected == 0 {
-		err = errors.New("user not found")
-		return
-	}
-
-	err = result.Error
+	invalid = databaseException(w, db)
 	return
 }
 
@@ -190,13 +184,11 @@ func generateProfileResponse(data database.ProfileAccount) profileResponse {
 	}
 }
 
-func getLibraryData(userId int) (data database.LibraryData, err error) {
+func getLibraryData(userId int, w http.ResponseWriter) (data database.LibraryData, invalid bool) {
+	invalid = false
 	db := database.DB.Where("user_id = ?", userId).Find(&data)
-	if db.RowsAffected < 1 {
-		err = errors.New("user not have any library")
-		return
-	} else {
-		err = db.Error
+	if invalid := databaseException(w, db); invalid {
+		invalid = true
 	}
 	return
 }
@@ -207,12 +199,7 @@ func isLibraryAdmin(w http.ResponseWriter, r *http.Request) (libraryData databas
 		return
 	}
 
-	libraryData, err := getLibraryData(data.ID)
-	if err != nil {
-		invalid = true
-		badRequest(w, err.Error())
-		return
-	}
+	libraryData, invalid = getLibraryData(data.ID, w)
 
 	return
 }

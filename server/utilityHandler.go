@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+
+	"gorm.io/gorm"
 )
 
 func (data response) responseFormatter(w http.ResponseWriter) {
@@ -56,4 +58,16 @@ func handleNotAllowed() http.Handler {
 			Description: "Request not allowed with this method",
 		}.responseFormatter(w)
 	})
+}
+
+func databaseException(w http.ResponseWriter, db *gorm.DB) bool {
+	if db.RowsAffected < 1 {
+		badRequest(w, "data not found")
+		return true
+	} else if db.Error != nil {
+		intServerError(w, db.Error)
+		return true
+	} else {
+		return false
+	}
 }
