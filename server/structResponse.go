@@ -26,7 +26,7 @@ type responseBody struct {
 	Access                interface{} `json:"Access,omitempty"`
 	Dataset               interface{} `json:"dataset,omitempty"`
 	User                  interface{} `json:"user,omitempty"`
-	Token                 string      `json:"token,omitempty"`
+	Token                 *string     `json:"token,omitempty"`
 	Paginate              *paginate   `json:"paginate,omitempty"`
 }
 
@@ -130,14 +130,21 @@ type profileResponse struct {
 }
 
 type profilePermissionResponse struct {
-	CreatedAt    time.Time  `json:"createdAt"`
-	AcceptedAt   *time.Time `json:"acceptedAt"`
-	Id           int        `json:"id"`
-	PaperTitle   string     `json:"title"`
-	PaperSubject []string   `json:"subject"`
-	PaperType    string     `json:"type"`
-	Library      string     `json:"libraryName"`
-	Purpose      string     `json:"purpose"`
+	CreatedAt        time.Time      `json:"createdAt"`
+	AcceptedAt       *time.Time     `json:"acceptedAt,omitempty"`
+	CanceledAt       *time.Time     `json:"canceledAt,omitempty"`
+	Id               int            `json:"id"`
+	PaperId          int            `json:"paperId"`
+	PaperTitle       string         `json:"title"`
+	PaperSubject     pq.StringArray `json:"subject"`
+	PaperDescription datatypes.JSON `json:"description"`
+	PaperType        string         `json:"type"`
+	LibraryId        int            `json:"libraryId"`
+	Library          string         `json:"libraryName"`
+	Purpose          string         `json:"purpose"`
+	UserId           int            `json:"userId,omitempty"`
+	UserName         string         `json:"userName,omitempty"`
+	Status           string         `json:"status"`
 }
 
 type accessResponse struct {

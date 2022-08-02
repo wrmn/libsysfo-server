@@ -52,6 +52,7 @@ func Serve(port string) {
 	r.HandleFunc("/admin/library/user/find", libraryUserFind).Methods("GET")
 	r.HandleFunc("/admin/library/user/{id}", libraryUser).Methods("GET")
 	r.HandleFunc("/admin/library/user/{id}/borrow", libraryUserBorrow).Methods("GET")
+	r.HandleFunc("/admin/library/user/{id}/permission", libraryUserPermission).Methods("GET")
 
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")

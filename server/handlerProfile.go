@@ -151,7 +151,7 @@ func loginHandler(w http.ResponseWriter, data database.ProfileAccount) {
 	}
 	response{
 		Data: responseBody{
-			Token: tokenResult,
+			Token: &tokenResult,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",

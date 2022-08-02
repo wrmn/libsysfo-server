@@ -47,7 +47,10 @@ func librarySinglePaper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := database.LibraryPaper{}
-	err = database.DB.Where("Id = ? AND library_id = ?", paperId, libraryData.ID).Find(&result).Error
+	err = database.DB.
+		Where("Id = ? AND library_id = ?", paperId, libraryData.ID).
+		Preload("Permission.User.ProfileData").
+		Find(&result).Error
 	if err != nil {
 		intServerError(w, err)
 		return
@@ -56,9 +59,12 @@ func librarySinglePaper(w http.ResponseWriter, r *http.Request) {
 	paperResponse := setPaperResponse(result)
 	paperResponse.PaperUrl = &result.PaperUrl
 
+	permissionResponse := appendPermissionData(result.Permission)
+
 	response{
 		Data: responseBody{
-			Paper: paperResponse,
+			Paper:      paperResponse,
+			Permission: permissionResponse,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
@@ -67,7 +73,6 @@ func librarySinglePaper(w http.ResponseWriter, r *http.Request) {
 }
 
 func libraryAddPaper(w http.ResponseWriter, r *http.Request) {
-
 	libraryData, invalid := isLibraryAdmin(w, r)
 	if invalid {
 		return
@@ -111,7 +116,7 @@ func libraryAddPaper(w http.ResponseWriter, r *http.Request) {
 
 	file := imgkit.ImgInformation{
 		File:     e.PaperFile,
-		FileName: e.Title,
+		FileName: strconv.Itoa(paperData.ID),
 		Folder:   fmt.Sprintf("/paper/%d/", paperData.ID),
 	}
 	upr, err := file.UploadImage()
@@ -172,7 +177,7 @@ func libraryUpdatePaper(w http.ResponseWriter, r *http.Request) {
 
 	result.Title = e.Title
 	result.Subject = e.Subject
-	result.Subject = e.Subject
+	result.Access = *e.Access
 	result.Abstract = e.Abstract
 	result.Type = e.Type
 	result.Description = e.Description
@@ -224,7 +229,7 @@ func libraryUpdatePaperFile(w http.ResponseWriter, r *http.Request) {
 
 	file := imgkit.ImgInformation{
 		File:     e.File,
-		FileName: result.Title,
+		FileName: strconv.Itoa(result.ID),
 		Folder:   fmt.Sprintf("/paper/%d/", result.ID),
 	}
 	upr, err := file.UploadImage()

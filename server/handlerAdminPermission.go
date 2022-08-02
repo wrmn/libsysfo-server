@@ -22,6 +22,7 @@ func libraryPermission(w http.ResponseWriter, r *http.Request) {
 	err := database.DB.
 		Where("library_id = ?", libraryData.ID).
 		Preload("Permission.Paper.Library").
+		Preload("Permission.User.ProfileData").
 		Find(&data).
 		Error
 
@@ -120,8 +121,10 @@ func accessHistory(w http.ResponseWriter, r *http.Request) {
 
 	permissionData := database.LibraryPaperPermission{}
 
-	db := database.DB.Where("id = ?", id).Preload("Paper").
-		Preload("Access").Find(&permissionData)
+	db := database.DB.Where("id = ?", id).
+		Preload("Paper").
+		Preload("Access").
+		Preload("User.ProfileData").Find(&permissionData)
 
 	if invalid := databaseException(w, db); invalid {
 		return
@@ -221,5 +224,53 @@ func actionPermission(w http.ResponseWriter, r *http.Request) {
 		Status:      http.StatusOK,
 		Reason:      "Ok",
 		Description: msg,
+	}.responseFormatter(w)
+}
+
+func libraryUserPermission(w http.ResponseWriter, r *http.Request) {
+	libraryData, invalid := isLibraryAdmin(w, r)
+	if invalid {
+		return
+	}
+
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		badRequest(w, "invalid id")
+		return
+	}
+	userResult := database.ProfileAccount{}
+	err = database.DB.Where("id = ?", id).
+		Preload("Permission.Paper.Library").
+		Preload("Permission.User.ProfileData").
+		Preload("ProfileData").
+		Find(&userResult).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	permissionData := appendPermissionData(userResult.Permission)
+	respPermission := []profilePermissionResponse{}
+
+	for _, i := range permissionData {
+		if i.LibraryId == libraryData.ID {
+			respPermission = append(respPermission, i)
+		}
+	}
+
+	response{
+		Data: responseBody{
+			User: profileResponse{
+				Id:       &userResult.ID,
+				Username: userResult.Username,
+				Email:    userResult.Email,
+				Verified: userResult.ProfileData.VerifiedAt,
+				Name:     userResult.ProfileData.Name,
+			},
+			Permission: &respPermission,
+		},
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Success",
 	}.responseFormatter(w)
 }

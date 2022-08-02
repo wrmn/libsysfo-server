@@ -138,20 +138,27 @@ func formatBorrowData(d database.LibraryCollectionBorrow) profileCollectionBorro
 		Library:      d.Collection.Library.Name,
 		UserId:       d.User.ID,
 		UserName:     d.User.ProfileData.Name,
-		Status:       setStatus(d),
+		Status:       setBorrowStatus(d),
 	}
 }
 
 func formatPermissionData(j database.LibraryPaperPermission) profilePermissionResponse {
 	return profilePermissionResponse{
-		CreatedAt:    j.CreatedAt,
-		AcceptedAt:   j.AcceptedAt,
-		Id:           j.ID,
-		PaperTitle:   j.Paper.Title,
-		PaperSubject: j.Paper.Subject,
-		PaperType:    j.Paper.Type,
-		Library:      j.Paper.Library.Name,
-		Purpose:      j.Purpose,
+		CreatedAt:        j.CreatedAt,
+		AcceptedAt:       j.AcceptedAt,
+		CanceledAt:       j.CanceledAt,
+		Id:               j.ID,
+		PaperId:          j.PaperID,
+		PaperTitle:       j.Paper.Title,
+		PaperSubject:     j.Paper.Subject,
+		PaperDescription: j.Paper.Description,
+		PaperType:        j.Paper.Type,
+		LibraryId:        j.Paper.LibraryID,
+		Library:          j.Paper.Library.Name,
+		Purpose:          j.Purpose,
+		UserId:           j.UserID,
+		UserName:         j.User.ProfileData.Name,
+		Status:           setPermissionStatus(j),
 	}
 }
 
@@ -241,7 +248,7 @@ func (data paginate) generate(r *http.Request, page int) (result paginate) {
 	return
 }
 
-func setStatus(d database.LibraryCollectionBorrow) string {
+func setBorrowStatus(d database.LibraryCollectionBorrow) string {
 	if d.ReturnedAt != nil {
 		return "finished"
 	}
@@ -252,6 +259,16 @@ func setStatus(d database.LibraryCollectionBorrow) string {
 		return "canceled"
 	}
 	if d.AcceptedAt != nil {
+		return "accepted"
+	}
+	return "requested"
+}
+
+func setPermissionStatus(p database.LibraryPaperPermission) string {
+	if p.CanceledAt != nil {
+		return "canceled"
+	}
+	if p.AcceptedAt != nil {
 		return "accepted"
 	}
 	return "requested"

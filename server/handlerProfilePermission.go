@@ -77,7 +77,7 @@ func profileReadPaper(w http.ResponseWriter, r *http.Request) {
 func searchPermission(id int) (respBody []profilePermissionResponse, err error) {
 	data := []database.LibraryPaperPermission{}
 	err = database.DB.Where("user_id = ?", id).
-		Preload("Paper.Library").Find(&data).Error
+		Preload("Paper.Library").Preload("User.ProfileData").Find(&data).Error
 	if err != nil {
 		return
 	}
