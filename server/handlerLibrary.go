@@ -60,7 +60,7 @@ func singleLibrary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	paperData, err := getLibraryPaper(reqId)
+	paperData, err := getLibraryPaper(reqId, r)
 	if err != nil {
 		intServerError(w, err)
 		return

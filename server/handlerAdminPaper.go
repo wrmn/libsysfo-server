@@ -19,7 +19,7 @@ func libraryPaper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respBody := []paperResponse{}
-	paperData, err := getLibraryPaper(libraryData.ID)
+	paperData, err := getLibraryPaper(libraryData.ID, r)
 	if err != nil {
 		intServerError(w, err)
 	}

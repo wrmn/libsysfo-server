@@ -26,7 +26,8 @@ type borrowRequest struct {
 }
 
 type permissionRequest struct {
-	State string `json:"state"`
+	PermissionId int    `json:"permissionId"`
+	State        string `json:"state"`
 }
 
 type paperAddRequest struct {

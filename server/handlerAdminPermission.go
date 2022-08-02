@@ -77,15 +77,17 @@ func findPermission(w http.ResponseWriter, r *http.Request) {
 		Preload("Permission", func(db *gorm.DB) *gorm.DB {
 			return database.DB.
 				Preload("Access").
-				Preload("Paper.Library").
-				Preload("User.ProfileData").
 				Where("user_id = ?", uid)
 		}).Find(&paperData)
 	if invalid := databaseException(w, db); invalid {
 		return
 	}
-
-	permissionData := appendPermissionData(paperData.Permission)
+	if len(paperData.Permission) < 1 {
+		badRequest(w, "permission not found")
+		return
+	}
+	permission := paperData.Permission[0]
+	permissionData := formatPermissionData(permission)
 
 	userData, invalid := findUserById(uid, w)
 	if invalid {
@@ -95,11 +97,17 @@ func findPermission(w http.ResponseWriter, r *http.Request) {
 	paperResponse := setPaperResponse(paperData)
 	paperResponse.PaperUrl = &paperData.PaperUrl
 
+	respBody := accessResponse{
+		Total:     len(permission.Access),
+		CreatedAt: appendAccessData(permission.Access),
+	}
+
 	response{
 		Data: responseBody{
 			User:       generateProfileResponse(userData),
 			Paper:      paperResponse,
 			Permission: &permissionData,
+			Access:     &respBody,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
@@ -140,16 +148,9 @@ func accessHistory(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: appendAccessData(permissionData.Access),
 	}
 
-	paperResponse := setPaperResponse(permissionData.Paper)
-	paperResponse.PaperUrl = &permissionData.Paper.PaperUrl
-
-	permissionResponse := formatPermissionData(permissionData)
-
 	response{
 		Data: responseBody{
-			Paper:      paperResponse,
-			Permission: permissionResponse,
-			Access:     respBody,
+			Access: respBody,
 		},
 		Status:      http.StatusOK,
 		Reason:      "Ok",
@@ -163,19 +164,13 @@ func actionPermission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
-		badRequest(w, "invalid id")
-		return
-	}
-
 	now := time.Now()
 	var msg string
 	var e permissionRequest
 	var unmarshalErr *json.UnmarshalTypeError
 
 	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&e)
+	err := decoder.Decode(&e)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {
 			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
@@ -187,7 +182,7 @@ func actionPermission(w http.ResponseWriter, r *http.Request) {
 
 	permissionData := database.LibraryPaperPermission{}
 
-	db := database.DB.Where("id = ?", id).
+	db := database.DB.Where("id = ?", e.PermissionId).
 		Preload("Paper").Find(&permissionData)
 
 	if invalid := databaseException(w, db); invalid {

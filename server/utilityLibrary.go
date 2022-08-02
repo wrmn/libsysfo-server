@@ -58,9 +58,23 @@ func getLibraryBook(libId int, r *http.Request) (bookData []bookResponse, err er
 	return
 }
 
-func getLibraryPaper(libId int) (paperData []paperResponse, err error) {
+func getLibraryPaper(libId int, r *http.Request) (paperData []paperResponse, err error) {
 	paperQuery := []database.LibraryPaper{}
+	q := r.URL.Query()
+	var db *gorm.DB
 	err = database.DB.Where("library_id = ?", libId).Find(&paperQuery).Error
+	if err != nil {
+		return
+	}
+
+	if q.Has("pkw") {
+		pkw := fmt.Sprintf("%%%s%%", strings.ToLower(q.Get("pkw")))
+		db = database.DB.Where("library_id = ? AND LOWER(title) LIKE ?", libId, pkw)
+	} else {
+		db = database.DB.Where("library_id = ?", libId)
+	}
+
+	err = db.Order("id desc").Find(&paperQuery).Error
 	if err != nil {
 		return
 	}
@@ -143,6 +157,7 @@ func formatBorrowData(d database.LibraryCollectionBorrow) profileCollectionBorro
 }
 
 func formatPermissionData(j database.LibraryPaperPermission) profilePermissionResponse {
+	status := setPermissionStatus(j)
 	return profilePermissionResponse{
 		CreatedAt:        j.CreatedAt,
 		AcceptedAt:       j.AcceptedAt,
@@ -158,7 +173,7 @@ func formatPermissionData(j database.LibraryPaperPermission) profilePermissionRe
 		Purpose:          j.Purpose,
 		UserId:           j.UserID,
 		UserName:         j.User.ProfileData.Name,
-		Status:           setPermissionStatus(j),
+		Status:           status,
 	}
 }
 

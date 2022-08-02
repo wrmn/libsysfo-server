@@ -23,7 +23,7 @@ type responseBody struct {
 	Borrow                interface{} `json:"borrow,omitempty"`
 	Paper                 interface{} `json:"paper,omitempty"`
 	Permission            interface{} `json:"permission,omitempty"`
-	Access                interface{} `json:"Access,omitempty"`
+	Access                interface{} `json:"access,omitempty"`
 	Dataset               interface{} `json:"dataset,omitempty"`
 	User                  interface{} `json:"user,omitempty"`
 	Token                 *string     `json:"token,omitempty"`
