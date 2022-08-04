@@ -24,6 +24,7 @@ func Serve(port string) {
 	r.HandleFunc("/db/seed/profile", testSeedProfile).Methods("GET")
 	r.HandleFunc("/db/seed/book", testSeedBook).Methods("GET")
 	r.HandleFunc("/db/seed/library", testSeedLibrary).Methods("GET")
+	r.HandleFunc("/test/excel", testExcel).Methods("GET")
 
 	r.HandleFunc("/admin/library", adminInformation).Methods("GET")
 	r.HandleFunc("/admin/library/login", adminLogin).Methods("POST")
@@ -48,6 +49,13 @@ func Serve(port string) {
 	r.HandleFunc("/admin/library/permission/find", findPermission).Methods("GET")
 	r.HandleFunc("/admin/library/permission/action", actionPermission).Methods("POST")
 	r.HandleFunc("/admin/library/permission/{id}/access", accessHistory).Methods("GET")
+
+	r.HandleFunc("/admin/library/report/book", booksReport).Methods("GET")
+	r.HandleFunc("/admin/library/report/book/{id}", bookReport).Methods("GET")
+	r.HandleFunc("/admin/library/report/borrow", borrowReport).Methods("GET")
+	r.HandleFunc("/admin/library/report/paper/id", testExcel).Methods("GET")
+	r.HandleFunc("/admin/library/report/permission", testExcel).Methods("GET")
+	r.HandleFunc("/admin/library/report/permission/{id}", testExcel).Methods("GET")
 
 	r.HandleFunc("/admin/library/user/find", libraryUserFind).Methods("GET")
 	r.HandleFunc("/admin/library/user/{id}", libraryUser).Methods("GET")

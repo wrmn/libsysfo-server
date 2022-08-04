@@ -40,3 +40,40 @@ func DateRandom(minYear string, maxYear string) time.Time {
 	max, _ := time.Parse(Dmy, maxYear)
 	return gofakeit.DateRange(min, max)
 }
+
+func StatusString(i int) string {
+	switch i {
+	case 1:
+		return "New"
+	case 2:
+		return "Great"
+	case 3:
+		return "Good"
+	case 4:
+		return "Bad"
+	default:
+		return "Undefined"
+	}
+}
+
+func AvailabilityString(i int) string {
+	switch i {
+	case 1:
+		return "Available"
+	case 2:
+		return "Read Only"
+	case 3:
+		return "Good"
+	default:
+		return "Undefined"
+	}
+}
+
+func Compare(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}

@@ -279,6 +279,20 @@ func setBorrowStatus(d database.LibraryCollectionBorrow) string {
 	return "requested"
 }
 
+func getDate(t *time.Time) string {
+	if t != nil {
+		return t.Format("2 Jan 2006 15:04:05")
+	}
+	return "-"
+}
+
+func getString(s *string) string {
+	if s != nil {
+		return *s
+	}
+	return "-"
+}
+
 func setPermissionStatus(p database.LibraryPaperPermission) string {
 	if p.CanceledAt != nil {
 		return "canceled"

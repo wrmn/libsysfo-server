@@ -68,7 +68,7 @@ func Checker() {
 		for _, d := range dataAccess {
 			if d.AcceptedAt == nil && d.CanceledAt == nil {
 				diff := time.Since(d.CreatedAt)
-				if diff.Hours() <= 48 {
+				if diff.Hours() >= 48 {
 					d.CanceledAt = &now
 					DB.Save(&d)
 				}
