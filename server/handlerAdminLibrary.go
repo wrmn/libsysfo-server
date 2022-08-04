@@ -1,9 +1,13 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"libsysfo-server/database"
+	"libsysfo-server/utility/imgkit"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -212,4 +216,87 @@ func getBorrowDataset(q datarange) (borrowBody []borrowDataset) {
 		borrowBody = append(borrowBody, borrowResult)
 	}
 	return borrowBody
+}
+
+func libraryImage(w http.ResponseWriter, r *http.Request) {
+	libraryData, invalid := isLibraryAdmin(w, r)
+	if invalid {
+		return
+	}
+
+	var e libraryImageUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	img := imgkit.ImgInformation{
+		File:     e.File,
+		FileName: strconv.Itoa(libraryData.ID),
+		Folder:   fmt.Sprintf("/book/%d/", libraryData.ID),
+	}
+
+	upr, err := img.UploadImage()
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	libraryData.ImagesMain = upr.URL
+	err = database.DB.Save(&libraryData).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	response{
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Image updated",
+	}.responseFormatter(w)
+}
+
+func libraryGeneral(w http.ResponseWriter, r *http.Request) {
+	libraryData, invalid := isLibraryAdmin(w, r)
+	if invalid {
+		return
+	}
+
+	var e libraryGeneralUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	libraryData.Name = e.Name
+	libraryData.Address = e.Address
+	libraryData.Webpage = e.Webpage
+	libraryData.Description = e.Description
+	err = database.DB.Save(&libraryData).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	response{
+		Status:      http.StatusOK,
+		Reason:      "Ok",
+		Description: "Information updated",
+	}.responseFormatter(w)
 }

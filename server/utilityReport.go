@@ -6,6 +6,7 @@ import (
 	"libsysfo-server/utility/report"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -84,6 +85,31 @@ func generateBookHeader(d database.LibraryCollection) []report.MainHeader {
 	}}
 }
 
+func generatePaperHeader(d database.LibraryPaper) []report.MainHeader {
+	return []report.MainHeader{{
+		Name:  "Report Created At",
+		Value: time.Now().Format("2 Jan 2006 15:04:05"),
+	}, {
+		Name:  "Collection Created At",
+		Value: d.CreatedAt.Format("2 Jan 2006 15:04:05"),
+	}, {
+		Name:  "Title",
+		Value: d.Title,
+	}, {
+		Name:  "Subject",
+		Value: strings.Join(d.Subject, ", "),
+	}, {
+		Name:  "Type",
+		Value: d.Type,
+	}, {
+		Name:  "Description",
+		Value: d.Description,
+	}, {
+		Name:  "Access",
+		Value: getAccessValue(d.Access),
+	}}
+}
+
 func appendBookRequest(f *excelize.File, s string, col int, i int, d database.LibraryCollection) {
 	var count int64
 	database.DB.
@@ -119,4 +145,34 @@ func appendBorrowReport(f *excelize.File, s string, col int, i int, d database.L
 	f.SetCellValue(s, report.Cell("J", col), d.User.ProfileData.Name)
 	f.SetCellValue(s, report.Cell("K", col), getString(d.User.Username))
 	f.SetCellValue(s, report.Cell("L", col), d.User.Email)
+}
+
+func appendPaperReport(f *excelize.File, s string, col int, i int, d database.LibraryPaper) {
+	var count int64
+	database.DB.
+		Model(&database.LibraryPaperPermission{}).
+		Where("paper_id = ?", d.ID).
+		Count(&count)
+
+	f.SetCellValue(s, report.Cell("A", col), i)
+	f.SetCellValue(s, report.Cell("B", col), d.CreatedAt.Format("2 Jan 2006 15:04:05"))
+	f.SetCellValue(s, report.Cell("C", col), d.Title)
+	f.SetCellValue(s, report.Cell("D", col), strings.Join(d.Subject, ", "))
+	f.SetCellValue(s, report.Cell("E", col), d.Type)
+	f.SetCellValue(s, report.Cell("F", col), d.Description)
+	f.SetCellValue(s, report.Cell("G", col), getAccessValue(d.Access))
+	f.SetCellValue(s, report.Cell("H", col), count)
+}
+
+func appendPermissionReport(f *excelize.File, s string, col int, i int, d database.LibraryPaperPermission) {
+	f.SetCellValue(s, report.Cell("A", col), i)
+	f.SetCellValue(s, report.Cell("B", col), setPermissionStatus(d))
+	f.SetCellValue(s, report.Cell("C", col), d.CreatedAt.Format("2 Jan 2006 15:04:05"))
+	f.SetCellValue(s, report.Cell("D", col), getDate(d.AcceptedAt))
+	f.SetCellValue(s, report.Cell("E", col), getDate(d.CanceledAt))
+	f.SetCellValue(s, report.Cell("F", col), d.Paper.Title)
+	f.SetCellValue(s, report.Cell("G", col), d.User.ProfileData.Name)
+	f.SetCellValue(s, report.Cell("H", col), getString(d.User.Username))
+	f.SetCellValue(s, report.Cell("I", col), d.User.Email)
+	f.SetCellValue(s, report.Cell("J", col), len(d.Access))
 }

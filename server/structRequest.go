@@ -100,3 +100,14 @@ type profileUpdateRequest struct {
 	PhoneNo      *string `json:"phoneNo,omitempty"`
 	IsWhatsapp   bool    `json:"isWhatsapp,omitempty"`
 }
+
+type libraryGeneralUpdateRequest struct {
+	Name        string `json:"name"`
+	Webpage     string `json:"webpage"`
+	Address     string `json:"address"`
+	Description string `json:"description"`
+}
+
+type libraryImageUpdateRequest struct {
+	File []byte `json:"file"`
+}

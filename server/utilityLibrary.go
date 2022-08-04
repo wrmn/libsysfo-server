@@ -293,6 +293,13 @@ func getString(s *string) string {
 	return "-"
 }
 
+func getAccessValue(d bool) string {
+	if d {
+		return "Accessible"
+	}
+	return "Inaccessible"
+}
+
 func setPermissionStatus(p database.LibraryPaperPermission) string {
 	if p.CanceledAt != nil {
 		return "canceled"

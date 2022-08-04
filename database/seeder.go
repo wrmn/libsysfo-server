@@ -421,10 +421,15 @@ func SeedLibraryPaperAccess() {
 	currentTime := time.Now()
 	rand.Seed(currentTime.UnixNano())
 	for i := 0; i < 1000; i++ {
-		data = append(data, LibraryPaperAccess{
-			CreatedAt:    utility.DateRandom("2022-01-01", "2022-07-31"),
-			PermissionID: rand.Intn(200) + 1,
-		})
+		var permission LibraryPaperPermission
+		permissionId := rand.Intn(200) + 1
+		DB.Where("Id = ?", permissionId).Find(&permission)
+		if permission.AcceptedAt != nil {
+			data = append(data, LibraryPaperAccess{
+				CreatedAt:    utility.DateRandom("2022-01-01", "2022-07-31"),
+				PermissionID: permissionId,
+			})
+		}
 	}
 	DB.Create(&data)
 }

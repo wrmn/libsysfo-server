@@ -59,52 +59,98 @@ var BookReport []MainTable = []MainTable{{
 	Name:  "Borrow Total",
 }}
 
-var BorrowReport []MainTable = []MainTable{
-	{
-		Width: 5,
-		Name:  "No",
-	},
-	{
-		Width: 15,
-		Name:  "Status",
-	},
-	{
-		Width: 20,
-		Name:  "Requested At",
-	},
-	{
-		Width: 20,
-		Name:  "Accepted At",
-	},
-	{
-		Width: 20,
-		Name:  "Taked At",
-	},
-	{
-		Width: 20,
-		Name:  "Returned At",
-	},
-	{
-		Width: 20,
-		Name:  "Canceled At",
-	},
-	{
-		Width: 20,
-		Name:  "Book Title",
-	},
-	{
-		Width: 20,
-		Name:  "Book Serial Number",
-	},
-	{
-		Width: 20,
-		Name:  "Borrower Name",
-	},
-	{
-		Width: 20,
-		Name:  "Borrower Username",
-	},
-	{
-		Width: 20,
-		Name:  "Borrower E-mail",
-	}}
+var BorrowReport []MainTable = []MainTable{{
+	Width: 5,
+	Name:  "No",
+}, {
+	Width: 15,
+	Name:  "Status",
+}, {
+	Width: 20,
+	Name:  "Requested At",
+}, {
+	Width: 20,
+	Name:  "Accepted At",
+}, {
+	Width: 20,
+	Name:  "Taked At",
+}, {
+	Width: 20,
+	Name:  "Returned At",
+}, {
+	Width: 20,
+	Name:  "Canceled At",
+}, {
+	Width: 20,
+	Name:  "Book Title",
+}, {
+	Width: 20,
+	Name:  "Book Serial Number",
+}, {
+	Width: 20,
+	Name:  "Borrower Name",
+}, {
+	Width: 20,
+	Name:  "Borrower Username",
+}, {
+	Width: 20,
+	Name:  "Borrower E-mail",
+}}
+
+var PaperReport []MainTable = []MainTable{{
+	Width: 5,
+	Name:  "No",
+}, {
+	Width: 20,
+	Name:  "Created At",
+}, {
+	Width: 20,
+	Name:  "Title",
+}, {
+	Width: 20,
+	Name:  "Subject",
+}, {
+	Width: 10,
+	Name:  "Type",
+}, {
+	Width: 25,
+	Name:  "Description",
+}, {
+	Width: 15,
+	Name:  "Access",
+}, {
+	Width: 15,
+	Name:  "Permission",
+}}
+
+var PermissionReport []MainTable = []MainTable{{
+	Width: 5,
+	Name:  "No",
+}, {
+	Width: 15,
+	Name:  "Status",
+}, {
+	Width: 20,
+	Name:  "Requested At",
+}, {
+	Width: 15,
+	Name:  "Accepted At",
+}, {
+	Width: 15,
+	Name:  "Canceled At",
+}, {
+	Width: 25,
+	Name:  "Paper Title",
+}, {
+	Width: 20,
+	Name:  "Account Name",
+}, {
+	Width: 20,
+	Name:  "Account Username",
+}, {
+	Width: 20,
+	Name:  "Account E-mail",
+}, {
+	Width: 15,
+	Name:  "Total Access",
+}}

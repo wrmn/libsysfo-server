@@ -47,12 +47,11 @@ func librarySinglePaper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := database.LibraryPaper{}
-	err = database.DB.
+	db := database.DB.
 		Where("Id = ? AND library_id = ?", paperId, libraryData.ID).
 		Preload("Permission.User.ProfileData").
-		Find(&result).Error
-	if err != nil {
-		intServerError(w, err)
+		Find(&result)
+	if invalid := databaseException(w, db); invalid {
 		return
 	}
 
