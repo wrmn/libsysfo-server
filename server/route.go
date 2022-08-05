@@ -63,6 +63,8 @@ func Serve(port string) {
 
 	r.HandleFunc("/admin/library/update", libraryGeneral).Methods("POST")
 	r.HandleFunc("/admin/library/update/image", libraryImage).Methods("POST")
+	r.HandleFunc("/admin/library/update/image/content", libraryContentImage).Methods("POST")
+	r.HandleFunc("/admin/library/update/location", libraryLocation).Methods("POST")
 
 	r.HandleFunc("/profile", profileInformation).Methods("GET")
 	r.HandleFunc("/profile/login", loginForm).Methods("POST")

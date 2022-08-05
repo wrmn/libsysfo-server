@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"libsysfo-server/database"
+	"libsysfo-server/utility"
 	"libsysfo-server/utility/imgkit"
 	"net/http"
 	"strconv"
@@ -241,7 +242,7 @@ func libraryImage(w http.ResponseWriter, r *http.Request) {
 	img := imgkit.ImgInformation{
 		File:     e.File,
 		FileName: strconv.Itoa(libraryData.ID),
-		Folder:   fmt.Sprintf("/book/%d/", libraryData.ID),
+		Folder:   fmt.Sprintf("/library/%d/", libraryData.ID),
 	}
 
 	upr, err := img.UploadImage()
@@ -299,4 +300,134 @@ func libraryGeneral(w http.ResponseWriter, r *http.Request) {
 		Reason:      "Ok",
 		Description: "Information updated",
 	}.responseFormatter(w)
+}
+
+func libraryContentImage(w http.ResponseWriter, r *http.Request) {
+	libraryData, invalid := isLibraryAdmin(w, r)
+	if invalid {
+		return
+	}
+
+	var e libraryImageContentUpdateRequest
+	var unmarshalErr *json.UnmarshalTypeError
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	switch e.Action {
+	case "add":
+		if err := libraryAddImage(libraryData, e); err == nil {
+			response{
+				Status:      http.StatusOK,
+				Reason:      "Ok",
+				Description: "Image uploaded",
+			}.responseFormatter(w)
+		} else {
+			intServerError(w, err)
+			return
+		}
+	case "edit":
+		if err := libraryUpdateImage(libraryData, e); err == nil {
+			response{
+				Status:      http.StatusOK,
+				Reason:      "Ok",
+				Description: "Image updated",
+			}.responseFormatter(w)
+		} else {
+			intServerError(w, err)
+			return
+		}
+	case "delete":
+		if err := libraryDeleteImage(libraryData, e.Index); err == nil {
+			response{
+				Status:      http.StatusOK,
+				Reason:      "Ok",
+				Description: "Image Deleted",
+			}.responseFormatter(w)
+		} else {
+			intServerError(w, err)
+		}
+	default:
+		badRequest(w, "invalid action use add, edit, or delete")
+	}
+}
+
+func libraryAddImage(libData database.LibraryData, body libraryImageContentUpdateRequest) error {
+	img := imgkit.ImgInformation{
+		File:     body.File,
+		FileName: strconv.Itoa(libData.ID),
+		Folder:   fmt.Sprintf("/library/content/%d/", libData.ID),
+	}
+
+	upr, err := img.UploadImage()
+	if err != nil {
+		return err
+	}
+
+	libData.ImagesContent = append(libData.ImagesContent, upr.URL)
+	err = database.DB.Save(&libData).Error
+	return err
+}
+
+func libraryUpdateImage(libData database.LibraryData, body libraryImageContentUpdateRequest) error {
+	img := imgkit.ImgInformation{
+		File:     body.File,
+		FileName: strconv.Itoa(libData.ID),
+		Folder:   fmt.Sprintf("/library/content/%d/", libData.ID),
+	}
+
+	upr, err := img.UploadImage()
+	if err != nil {
+		return err
+	}
+
+	libData.ImagesContent[body.Index] = upr.URL
+	err = database.DB.Save(&libData).Error
+	return err
+}
+
+func libraryDeleteImage(libData database.LibraryData, imgIndex int) error {
+	libData.ImagesContent = utility.RemoveIndex(libData.ImagesContent, imgIndex)
+	err := database.DB.Save(&libData).Error
+	return err
+}
+
+func libraryLocation(w http.ResponseWriter, r *http.Request) {
+	libraryData, invalid := isLibraryAdmin(w, r)
+	if invalid {
+		return
+	}
+
+	var e libraryLocationRequest
+	var unmarshalErr *json.UnmarshalTypeError
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&e)
+	if err != nil {
+		if errors.As(err, &unmarshalErr) {
+			badRequest(w, "Wrong Type provided for field "+unmarshalErr.Field)
+		} else {
+			badRequest(w, err.Error())
+		}
+		return
+	}
+
+	libraryData.Coordinate = e.Coord
+	if err := database.DB.Save(&libraryData).Error; err == nil {
+		response{
+			Status:      http.StatusOK,
+			Reason:      "Ok",
+			Description: "Location Updated",
+		}.responseFormatter(w)
+	} else {
+		intServerError(w, err)
+	}
 }

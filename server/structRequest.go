@@ -111,3 +111,13 @@ type libraryGeneralUpdateRequest struct {
 type libraryImageUpdateRequest struct {
 	File []byte `json:"file"`
 }
+
+type libraryImageContentUpdateRequest struct {
+	Action string `json:"action"`
+	Index  int    `json:"index"`
+	File   []byte `json:"file"`
+}
+
+type libraryLocationRequest struct {
+	Coord pq.Float64Array `json:"coords"`
+}

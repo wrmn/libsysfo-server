@@ -335,7 +335,6 @@ func cancelOtherBorrow(currentData database.LibraryCollectionBorrow) (err error)
 		data[i].CanceledAt = &now
 		database.DB.Save(&data[i])
 	}
-
 	return
 }
 
@@ -346,5 +345,4 @@ func generateCollectionResponse(data database.LibraryCollection) libraryCollecti
 		Availability: data.Availability,
 		Status:       data.Status,
 	}
-
 }
