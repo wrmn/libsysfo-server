@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"libsysfo-server/database"
 	"libsysfo-server/utility/cred"
 	"net/http"
@@ -77,6 +78,7 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 
 	collectionData := database.LibraryCollection{}
 	err = database.DB.
+		Preload("Library").
 		Where("id = ? ", e.Id).
 		Find(&collectionData).
 		Error
@@ -89,6 +91,28 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if collectionData.Availability == 2 {
 		badRequest(w, "Book only available for read on library")
+		return
+	}
+
+	collectionBorrow := []database.LibraryCollectionBorrow{}
+
+	err = database.DB.
+		Where("user_id = ? AND returned_at IS NULL AND canceled_at IS NULL", user.ID).
+		Preload("Collection.Library").Find(&collectionBorrow).Error
+
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+	borrowTotal := 0
+	for _, b := range collectionBorrow {
+		if collectionData.LibraryID == b.Collection.LibraryID {
+			borrowTotal += 1
+		}
+	}
+
+	if borrowTotal >= collectionData.Library.BorrowLimit {
+		badRequest(w, "Peminjaman yang berjalan pada perpustakaan ini mencapai limit")
 		return
 	}
 
@@ -105,9 +129,20 @@ func borrowNewBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = database.DB.Create(&database.Notification{
+		UserID:  collectionData.Library.UserID,
+		Message: "new borrow has been requested",
+		Read:    false,
+	}).Error
+
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
 	response{
 		Status:      http.StatusOK,
 		Reason:      "Ok",
-		Description: "Borrow requested",
+		Description: fmt.Sprintf("Borrow requested, total borrow in this library %d", borrowTotal+1),
 	}.responseFormatter(w)
 }

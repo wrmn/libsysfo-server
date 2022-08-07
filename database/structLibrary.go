@@ -17,6 +17,7 @@ type LibraryData struct {
 	Description   string          `json:"description" gorm:"type:text"`
 	ImagesMain    string          `json:"imagesMain" gorm:"type:varchar(256)"`
 	ImagesContent pq.StringArray  `json:"imagesContent" gorm:"type:varchar(256)[]"`
+	BorrowLimit   int             `json:"borrowLimit"`
 	Webpage       string          `json:"webpage" gorm:"type:varchar(32)"`
 }
 

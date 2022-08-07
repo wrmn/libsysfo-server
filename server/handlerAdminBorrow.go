@@ -269,6 +269,17 @@ func borrowNewAction(w http.ResponseWriter, e borrowRequest, libraryId int) {
 		return
 	}
 
+	err = database.DB.Create(&database.Notification{
+		UserID:  newBorrow.UserID,
+		Message: "New borrow has been added by admin",
+		Read:    false,
+	}).Error
+
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
 	response{
 		Status:      http.StatusOK,
 		Reason:      "Ok",
@@ -284,7 +295,7 @@ func borrowNextAction(w http.ResponseWriter, e borrowRequest) {
 
 	now := time.Now()
 	var msg string
-
+	var notifMsg string
 	if e.State == "next" {
 		if borrowData.AcceptedAt == nil {
 			err := cancelOtherBorrow(borrowData)
@@ -294,12 +305,15 @@ func borrowNextAction(w http.ResponseWriter, e borrowRequest) {
 			}
 			borrowData.AcceptedAt = &now
 			borrowData.Collection.Availability = 3
+			notifMsg = "borrow request has been accepted"
 		} else if borrowData.TakedAt == nil {
 			borrowData.TakedAt = &now
 			borrowData.Collection.Availability = 3
+			notifMsg = "borrow request has been taked"
 		} else if borrowData.ReturnedAt == nil {
 			borrowData.ReturnedAt = &now
 			borrowData.Collection.Availability = 1
+			notifMsg = "borrow request has been returned"
 		} else {
 			badRequest(w, "Borrow status already finished")
 			return
@@ -309,6 +323,7 @@ func borrowNextAction(w http.ResponseWriter, e borrowRequest) {
 		borrowData.CanceledAt = &now
 		borrowData.Collection.Availability = 1
 		msg = "Borrow is rejected"
+		notifMsg = "borrow request has been rejected"
 	} else {
 		badRequest(w, "Borrow status already canceled")
 		return
@@ -321,6 +336,17 @@ func borrowNextAction(w http.ResponseWriter, e borrowRequest) {
 	}
 
 	err = database.DB.Save(&borrowData.Collection).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	err = database.DB.Create(&database.Notification{
+		UserID:  borrowData.UserID,
+		Message: notifMsg,
+		Read:    false,
+	}).Error
+
 	if err != nil {
 		intServerError(w, err)
 		return

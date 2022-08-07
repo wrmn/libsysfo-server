@@ -105,6 +105,7 @@ type libraryGeneralUpdateRequest struct {
 	Name        string `json:"name"`
 	Webpage     string `json:"webpage"`
 	Address     string `json:"address"`
+	BorrowLimit int    `json:"borrowLimit"`
 	Description string `json:"description"`
 }
 
@@ -120,4 +121,10 @@ type libraryImageContentUpdateRequest struct {
 
 type libraryLocationRequest struct {
 	Coord pq.Float64Array `json:"coords"`
+}
+
+type newLibraryRequest struct {
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	LibraryName string `json:"libraryName"`
 }

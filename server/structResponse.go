@@ -26,6 +26,9 @@ type responseBody struct {
 	Access                interface{} `json:"access,omitempty"`
 	Dataset               interface{} `json:"dataset,omitempty"`
 	User                  interface{} `json:"user,omitempty"`
+	Feedback              interface{} `json:"feedback,omitempty"`
+	Jobs                  interface{} `json:"thirdParty,omitempty"`
+	Notification          interface{} `json:"notification,omitempty"`
 	Token                 *string     `json:"token,omitempty"`
 	Paginate              *paginate   `json:"paginate,omitempty"`
 }
@@ -89,15 +92,16 @@ type profileCollectionBorrowResponse struct {
 }
 
 type adminInformationResponse struct {
-	Username      string          `json:"username"`
-	Email         string          `json:"email"`
-	Library       string          `json:"libraryName"`
-	Image         string          `json:"libraryImage"`
-	Address       string          `json:"libraryAddress"`
-	Coordinate    pq.Float64Array `json:"coordinate"`
-	Description   string          `json:"description"`
-	ContentImages pq.StringArray  `json:"contentImages"`
-	Webpage       string          `json:"webpage"`
+	Username           string          `json:"username"`
+	Email              string          `json:"email"`
+	Library            string          `json:"libraryName"`
+	LibraryBorrowLimit int             `json:"libraryBorrowLimit"`
+	Image              string          `json:"libraryImage"`
+	Address            string          `json:"libraryAddress"`
+	Coordinate         pq.Float64Array `json:"coordinate"`
+	Description        string          `json:"description"`
+	ContentImages      pq.StringArray  `json:"contentImages"`
+	Webpage            string          `json:"webpage"`
 }
 
 type paperResponse struct {

@@ -201,15 +201,27 @@ func actionPermission(w http.ResponseWriter, r *http.Request) {
 
 	if e.State == "accept" {
 		permissionData.AcceptedAt = &now
-		msg = "request accepted"
+		msg = "permission request accepted"
 	} else if e.State == "cancel" {
 		permissionData.CanceledAt = &now
-		msg = "request rejected"
+		msg = "permission request rejected"
 	} else {
 		badRequest(w, "invalid state. use accept or cancel")
 		return
 	}
+
 	err = database.DB.Save(&permissionData).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	err = database.DB.Create(&database.Notification{
+		UserID:  permissionData.UserID,
+		Message: msg,
+		Read:    false,
+	}).Error
+
 	if err != nil {
 		intServerError(w, err)
 		return

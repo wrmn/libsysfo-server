@@ -226,6 +226,7 @@ func SeedLibraryData() {
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://i.pinimg.com/originals/ff/96/ee/ff96eecd5f94fc82b561ef2812c541de.jpg",
 		ImagesContent: pq.StringArray(content),
+		BorrowLimit:   6,
 		Webpage:       "unand.ac.id",
 	}, {
 		UserID:        3,
@@ -235,6 +236,7 @@ func SeedLibraryData() {
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://pustaka.unand.ac.id/images/perpustakaan.jpg",
 		ImagesContent: pq.StringArray(content),
+		BorrowLimit:   6,
 		Webpage:       "unand.ac.id",
 	}, {
 		UserID:        4,
@@ -244,6 +246,7 @@ func SeedLibraryData() {
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://asset.kompas.com/crops/gj4bxVEM-ombeC7YhdMPWTQqMwA=/0x67:800x600/750x500/data/photo/2018/01/06/3283493641.jpg",
 		ImagesContent: pq.StringArray(content),
+		BorrowLimit:   6,
 		Webpage:       "unand.ac.id",
 	}, {
 		UserID:        5,
@@ -253,6 +256,7 @@ func SeedLibraryData() {
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://i.pinimg.com/originals/ff/96/ee/ff96eecd5f94fc82b561ef2812c541de.jpg",
 		ImagesContent: pq.StringArray(content),
+		BorrowLimit:   6,
 		Webpage:       "unand.ac.id",
 	}, {
 		UserID:        6,
@@ -262,6 +266,7 @@ func SeedLibraryData() {
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://www.agati.com/wp-content/uploads/2017/06/Diane-Lam-Blog-header.jpg",
 		ImagesContent: pq.StringArray(content),
+		BorrowLimit:   6,
 		Webpage:       "unand.ac.id",
 	}, {
 		UserID:        7,
@@ -271,6 +276,7 @@ func SeedLibraryData() {
 		Description:   gofakeit.LoremIpsumParagraph(2, 5, 5, " "),
 		ImagesMain:    "https://s26162.pcdn.co/wp-content/uploads/2021/01/bookshelf1.jpg",
 		ImagesContent: pq.StringArray(content),
+		BorrowLimit:   6,
 		Webpage:       "unand.ac.id",
 	}}
 

@@ -20,10 +20,19 @@ func Serve(port string) {
 
 	// NOTE: db handler
 	// remove if unused
-	r.HandleFunc("/db/migrate", testMigrate).Methods("GET")
-	r.HandleFunc("/db/seed/profile", testSeedProfile).Methods("GET")
-	r.HandleFunc("/db/seed/book", testSeedBook).Methods("GET")
-	r.HandleFunc("/db/seed/library", testSeedLibrary).Methods("GET")
+	// r.HandleFunc("/db/migrate", testMigrate).Methods("GET")
+	// r.HandleFunc("/db/seed/profile", testSeedProfile).Methods("GET")
+	// r.HandleFunc("/db/seed/book", testSeedBook).Methods("GET")
+	// r.HandleFunc("/db/seed/library", testSeedLibrary).Methods("GET")
+
+	r.HandleFunc("/login", superAdminLogin).Methods("POST")
+	r.HandleFunc("/feedback", getFeedback).Methods("GET")
+	r.HandleFunc("/library/new", newLibrary).Methods("POST")
+	r.HandleFunc("/third-party", getThirdParty).Methods("GET")
+
+	r.HandleFunc("/feedback", newFeedback).Methods("POST")
+	r.HandleFunc("/notification", getNotification).Methods("GET")
+	r.HandleFunc("/notification", readNotification).Methods("POST")
 
 	r.HandleFunc("/admin/library", adminInformation).Methods("GET")
 	r.HandleFunc("/admin/library/login", adminLogin).Methods("POST")
@@ -95,8 +104,6 @@ func Serve(port string) {
 
 	r.HandleFunc("/paper", allPapers).Methods("GET")
 	r.HandleFunc("/paper/{id}", singlePaper).Methods("GET")
-
-	r.HandleFunc("/feedback", newFeedback).Methods("POST")
 
 	r.MethodNotAllowedHandler = handleNotAllowed()
 	r.NotFoundHandler = handleNotFound()

@@ -43,15 +43,16 @@ func adminInformation(w http.ResponseWriter, r *http.Request) {
 	response{
 		Data: responseBody{
 			Profile: adminInformationResponse{
-				Username:      *data.Username,
-				Email:         data.Email,
-				Library:       libraryData.Name,
-				Image:         libraryData.ImagesMain,
-				Address:       libraryData.Address,
-				Coordinate:    libraryData.Coordinate,
-				Description:   libraryData.Description,
-				ContentImages: libraryData.ImagesContent,
-				Webpage:       libraryData.Webpage,
+				Username:           *data.Username,
+				Email:              data.Email,
+				Library:            libraryData.Name,
+				LibraryBorrowLimit: libraryData.BorrowLimit,
+				Image:              libraryData.ImagesMain,
+				Address:            libraryData.Address,
+				Coordinate:         libraryData.Coordinate,
+				Description:        libraryData.Description,
+				ContentImages:      libraryData.ImagesContent,
+				Webpage:            libraryData.Webpage,
 			},
 		},
 		Status:      http.StatusOK,
@@ -288,6 +289,7 @@ func libraryGeneral(w http.ResponseWriter, r *http.Request) {
 	libraryData.Name = e.Name
 	libraryData.Address = e.Address
 	libraryData.Webpage = e.Webpage
+	libraryData.BorrowLimit = e.BorrowLimit
 	libraryData.Description = e.Description
 	err = database.DB.Save(&libraryData).Error
 	if err != nil {

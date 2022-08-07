@@ -121,9 +121,12 @@ func profileNewPermission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statsPaper := database.DB.
+	paperData := database.LibraryPaper{}
+	paperQuery := database.DB.
 		Where("id = ? AND access = true", e.Id).
-		Find(&database.LibraryPaper{}).RowsAffected
+		Preload("Library").
+		Find(&paperData)
+	statsPaper := paperQuery.RowsAffected
 
 	if statsPaper == 0 {
 		badRequest(w, "Dokumen tidak mengizinkan akses")
@@ -150,6 +153,17 @@ func profileNewPermission(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = database.DB.Save(&permission).Error
+	if err != nil {
+		intServerError(w, err)
+		return
+	}
+
+	err = database.DB.Create(&database.Notification{
+		UserID:  paperData.Library.UserID,
+		Message: "new permission has been requested",
+		Read:    false,
+	}).Error
+
 	if err != nil {
 		intServerError(w, err)
 		return

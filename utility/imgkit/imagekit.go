@@ -2,6 +2,7 @@ package imgkit
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"libsysfo-server/database"
 	"os"
@@ -36,10 +37,19 @@ func (data ImgInformation) UploadImage() (upr *imagekit.UploadResponse, err erro
 	ctx := context.Background()
 
 	upr, err = ik.Upload.ServerUpload(ctx, &ur)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	b, err := json.Marshal(upr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	database.DB.Save(&database.ThirdPartyJobs{
 		Job:          "upload Image",
 		Destination:  "ImageKit",
-		ResponseBody: upr.URL,
+		ResponseBody: string(b),
 		Status:       200,
 	})
 	return

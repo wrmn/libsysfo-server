@@ -20,6 +20,7 @@ func testMigrate(w http.ResponseWriter, _ *http.Request) {
 		&database.LibraryPaperAccess{},
 		&database.Feedback{},
 		&database.ThirdPartyJobs{},
+		&database.Notification{},
 	)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
